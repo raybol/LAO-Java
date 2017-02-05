@@ -26,14 +26,17 @@ public class Statement {
     }
 
     public Statement(String aSstatement) {
-        String[] operators ={".add.",".sub.",};
-
+        String[] operators = {".add.", ".sub.", ".mul.", ".div.", ".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne."};
+        String[] keywords = { "if", "then", "read", "print",  "end.","rem" };
         String[] result = aSstatement.split("\\s");
         for (String token : result) {
             if (Arrays.asList(operators).contains(token.toLowerCase())) {
-                Operator op = new Operator(token);
-                statement.add(op);
-            }
+                Operator t = new Operator(token);
+                statement.add(t);
+            } else if (Arrays.asList(keywords).contains(token.toLowerCase())) {
+                KeyWord t = new KeyWord(token);
+                statement.add(t);
+            } 
 
             //  this->tokenizer(aStatement);
             if (statement.get(0).getIdentifier().equals("rem")) {
