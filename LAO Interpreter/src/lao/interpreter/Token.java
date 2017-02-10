@@ -11,33 +11,20 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public abstract class Token {
-    private String identifier;
-    private String type;
+public class Token {
+    private String Identifier;
 
-    public Token(String identifier, String type) {
-        this.identifier = identifier;
-        this.type = type;
-    }
-
-    public Token(String identifier) {
-        this.identifier = identifier;
+    public Token(String Identifier) {
+        this.Identifier = Identifier;
     }
 
     public String getIdentifier() {
-        return identifier;
+        return Identifier;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setIdentifier(String Identifier) {
+        this.Identifier = Identifier;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    
 
 }

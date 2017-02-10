@@ -11,9 +11,10 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public abstract class Literal extends Token{
+public class RealLiteral extends Literal{
+    private double value;
 
-    public Literal(String identifier) {
+    public RealLiteral(String identifier) {
         super(identifier);
     }
     

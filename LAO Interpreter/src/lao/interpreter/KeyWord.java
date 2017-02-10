@@ -12,10 +12,6 @@ package lao.interpreter;
  */
 public class KeyWord extends Token {
 
-    public KeyWord(String identifier, String type) {
-        super(identifier, type);
-    }
-
     public KeyWord(String identifier) {
         super(identifier);
     }

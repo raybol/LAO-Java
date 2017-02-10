@@ -11,10 +11,24 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public abstract class Literal extends Token{
+public class RealVariable extends Variable {
+    private double value;
 
-    public Literal(String identifier) {
+    public RealVariable(String identifier) {
         super(identifier);
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+         return Double.toString(value) ;
     }
     
 

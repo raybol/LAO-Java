@@ -11,17 +11,17 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public  class Variable extends Token {
-    private String type;
-
-    public Variable(String identifier, String type) {
-        super(identifier, type);
-    }
+public abstract class Variable extends Token {
 
     public Variable(String identifier) {
         super(identifier);
     }
 
-//    public abstract String getType();
+    @Override
+    public abstract String toString(); 
+//    {
+//        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+//    }
+//    
 
 }

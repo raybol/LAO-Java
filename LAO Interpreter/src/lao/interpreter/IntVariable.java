@@ -11,11 +11,29 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public abstract class Literal extends Token{
+public class IntVariable extends Variable {
+    private int value;
 
-    public Literal(String identifier) {
+
+
+    public IntVariable(String identifier) {
         super(identifier);
     }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+
+    @Override
+    public String toString() {
+        return Integer.toString(value) ;
+    }
+    
     
 
 }
