@@ -17,7 +17,8 @@ public abstract class Variable extends Token {
         super(identifier);
     }
 
-    public abstract char getType() ;
+    @Override
+    public abstract char getType();
 
     @Override
     public abstract String toString(); 
