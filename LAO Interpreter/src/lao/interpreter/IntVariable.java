@@ -5,21 +5,18 @@
  *                                                                
  *       CECS3210 Advanced Programming  
  */
-
 package lao.interpreter;
 
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class IntVariable extends Variable {
-    
     private int value;
     private char type;
 
-    
     public IntVariable(String identifier) {
         super(identifier);
-        type='i';
+        type = 'i';
     }
 
     public int getValue() {
@@ -30,16 +27,14 @@ public class IntVariable extends Variable {
         this.value = value;
     }
 
+    @Override
     public char getType() {
-        return type;
+         return type;
     }
 
     @Override
     public String toString() {
         return Integer.toString(value);
     }
-
-
-    
 
 }
