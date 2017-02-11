@@ -18,5 +18,4 @@ public class RealLiteral extends Literal{
         super(identifier);
     }
     
-
 }

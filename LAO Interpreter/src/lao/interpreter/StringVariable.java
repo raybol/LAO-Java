@@ -27,6 +27,7 @@ public class StringVariable extends Variable {
         this.value = value;
     }
 
+    @Override
     public char getType() {
         return type;
     }

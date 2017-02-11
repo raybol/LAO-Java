@@ -17,6 +17,7 @@ public class RealVariable extends Variable {
 
     public RealVariable(String identifier) {
         super(identifier);
+        type='r';
     }
 
     public double getValue() {
@@ -27,6 +28,7 @@ public class RealVariable extends Variable {
         this.value = value;
     }
 
+    @Override
     public char getType() {
         return type;
     }
