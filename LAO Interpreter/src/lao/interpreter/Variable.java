@@ -12,10 +12,12 @@ package lao.interpreter;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public abstract class Variable extends Token {
-
+  
     public Variable(String identifier) {
         super(identifier);
     }
+
+    public abstract char getType() ;
 
     @Override
     public abstract String toString(); 

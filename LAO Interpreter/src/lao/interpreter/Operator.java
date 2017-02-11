@@ -13,12 +13,12 @@ import java.util.Arrays;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class Operator extends Token {
-
+    private char type;
     private int prescedence;
 
     public Operator(String identifier) {
         super(identifier);
-        
+         type='o';
         String or = ".or.";
         String and = ".and.";
         String not = ".not.";
@@ -48,5 +48,10 @@ public class Operator extends Token {
     public int getPrescedence() {
         return prescedence;
     }
+
+    public char getType() {
+        return type;
+    }
+    
 
 }

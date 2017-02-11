@@ -11,7 +11,7 @@ package lao.interpreter;
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public class Token {
+public abstract class Token {
     private String Identifier;
 
     public Token(String Identifier) {
@@ -25,6 +25,8 @@ public class Token {
     public void setIdentifier(String Identifier) {
         this.Identifier = Identifier;
     }
-    
 
+    public abstract char getType();
+    
+    
 }

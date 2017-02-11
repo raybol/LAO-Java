@@ -11,9 +11,14 @@ package lao.interpreter;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class KeyWord extends Token {
-
+    private char type;
     public KeyWord(String identifier) {
         super(identifier);
+        type='k';
+    }
+
+    public char getType() {
+        return type;
     }
 
 }

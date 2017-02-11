@@ -18,22 +18,25 @@ import java.util.regex.Pattern;
  */
 public class Statement {
 
-    private List<Token> statement;
+    private List<Token> statement; 
+    private int line;
     private int size;
     private char type;
     private String errorMsg;
     private int errorID;
     private boolean validStatement;
+   
 
     public Statement(ArrayList<Token> statement) {
         this.statement = statement;
     }
 
-    public Statement(String aSstatement) {
+    public Statement(String aSstatement, int num) {
         validStatement = true;
+        line=num;
         statement = new ArrayList<Token>();
-        String[] operators = {".add.", ".sub.", ".mul.", ".div.", ".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne.", "="};
-        String[] keywords = {"if", "then", "read", "print", "end.", "rem"};
+        String[] operators = {".add.", ".sub.", ".mul.", ".div.", ".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne."};
+        String[] keywords = {"if", "then", "read", "print", "end.", "rem","="};
         String intPattern = new String("(-|\\+)?\\d+");
         String realPattern1 = new String("(-|\\+)?\\d+(\\.\\d+)?((e|E)(-|\\+)?\\d+)?");
         String realPattern2 = new String("(-|\\+)?(\\.\\d+)((e|E)(-|\\+)?\\d+)?");
@@ -104,11 +107,6 @@ public class Statement {
                 type = 'u';
             }
         }
-//       if(statement.get(2)instanceof Literal){
-//           System.out.println("true");
-//       }
-//       else
-//            System.out.println("false");
 
     }
 
@@ -118,6 +116,18 @@ public class Statement {
 
     public void setStatement(ArrayList<Token> statement) {
         this.statement = statement;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public boolean isValidStatement() {
+        return validStatement;
     }
 
     public int getSize() {
@@ -151,6 +161,18 @@ public class Statement {
     public void setErrorID(int errorID) {
         this.errorID = errorID;
     }
+    
+      public void printError() {
+
+        System.out.println("ERROR ON LINE " + getLine());
+        for (int i = 0; i <= errorID; i++) {
+            System.out.print(statement.get(i).getIdentifier() + " ");
+        }
+        System.out.println(" ");
+          System.out.println(errorMsg);
+
+    }
+
 
     public void print() {
         for (Token t : statement) {

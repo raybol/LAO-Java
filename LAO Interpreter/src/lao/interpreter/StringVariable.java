@@ -13,9 +13,10 @@ package lao.interpreter;
  */
 public class StringVariable extends Variable {
     private String value;
-
+    private char type;
     public StringVariable(String identifier) {
         super(identifier);
+        type='s';
     }
 
     public String getValue() {
@@ -24,6 +25,10 @@ public class StringVariable extends Variable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public char getType() {
+        return type;
     }
 
     @Override

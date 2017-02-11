@@ -7,6 +7,8 @@
  */
 package lao.interpreter;
 
+import java.util.Arrays;
+
 /**
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
@@ -32,8 +34,36 @@ public class StatementParser {
         }
         return false;
     }
+    
+    public boolean parse(){
+             boolean ok = true;
+      
+        switch (statement.getType()) {
+            case 'c':
+                break;
+            case 'p':
+                isPrint(0, statement.getStatement().size() - 1);
+                break;
+            case 'r':
+                break;
+            case 'i':
+                break;
+            case 'e':
+               
+                break;
+            case 'a':
+                ok = isAssigment(0, statement.getStatement().size() - 1);
+                break;
 
-    public boolean isPrint( int start, int end) {
+            case 'u':
+                ok=false;
+                break;
+
+        }
+        return ok;
+    }
+    
+    public boolean isPrint(int start, int end) {
 
         if ((end - start) == 1) {//isVariable(statement[start + 1]) ||
             if (statement.getStatement().get(start + 1) instanceof Variable
@@ -45,10 +75,226 @@ public class StatementParser {
         } else if (end == start) {
             return true;
         }
-       // printStatement(statement, start);
+        // printStatement(statement, start);
         System.out.println("expected variable, number or string");
-    //    cout << "expected variable, number or string" << endl;
+        //    cout << "expected variable, number or string" << endl;
         return false;
+    }
+
+    boolean isConditionalExpression(int start, int end) {
+        if (statement.getStatement().get(end) instanceof Operator) {
+            statement.setErrorMsg("missing operand");
+            statement.setErrorID(end);
+            return false;
+        }
+//	if (isOperator(statement[end])) {
+//		printStatement(statement, end);
+//		cout << "missing operand";
+//		return false;
+//	}
+        boolean hasOp = false;
+        String[] operators = {".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne.", "="};
+        for (int i = start; i <= end && !hasOp; i++) {
+            if (Arrays.asList(operators).contains(statement.getStatement().get(i).getIdentifier().toLowerCase())) {
+                hasOp = true;
+            }
+        }
+
+        if (!hasOp) {
+            statement.setErrorMsg("missing logical or relation operator");
+            statement.setErrorID(end);
+//		printStatement(statement, end);
+//		cout << "missing logical or relation operator";
+            return false;
+        }
+        return isLogicalExpression(start, end);
+    }
+
+    boolean isLogicalExpression(int start, int end) {
+
+        boolean hasOP = false;
+        int i;
+        //for (it; it != statement.end(); ++it, i++) 
+        for (i = start; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".and.")
+                    || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".or.")) {
+
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+
+            return isLogicalExpression(start, i - 1) && isNeg(i + 1, end);
+        } else {
+            return isNeg(start, end);
+        }
+
+    }
+
+    boolean isNeg(int start, int end) {
+
+        boolean hasOP = false;
+        int i;
+        //for (it; it != statement.end(); ++it, i++) 
+        for (i = start; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".not.")) {
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+            return isNeg(i + 1, end);
+        } else {
+            return isEQExpression(start, end);
+        }
+        //return true;
+    }
+
+    boolean isEQExpression(int start, int end) {
+
+        boolean hasOP = false;
+        int i = start;
+
+        for (i = start; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".eq.")
+                    || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".ne.")) {
+
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+            return isEQExpression(start, i - 1) && isRelationalexpression(i + 1, end);
+        } else {
+            return isRelationalexpression(start, end);
+        }
+
+    }
+
+    boolean isRelationalexpression(int start, int end) {
+
+        boolean hasOP = false;
+        int i = start;
+
+        String[] operators = {".gt.", ".lt.", ".ge.", ".le."};
+        for (i = start; i < end; i++) {
+            if (Arrays.asList(operators).contains(statement.getStatement().get(i).getIdentifier().toLowerCase())) {
+
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+//		if (isStringVariable((statement[i + 1])) || isStringVariable((statement[i - 1])) || isString((statement[i + 1])) || isString((statement[i - 1]))) {
+//			if (
+//				!((isStringVariable((statement[i - 1])) || isString((statement[i - 1]))) && (!(isStringVariable((statement[i + 1]))) || (!isString((statement[i + 1])))))
+//				)
+//			{
+//				printStatement(statement, i);
+//				cout << "opertator: " << statement[i] << " wrong operand data type" << endl;
+//				return false;
+//			}
+//
+//		}
+            return isRelationalexpression(start, i - 1) && isExpression(i + 1, end);
+        } else {
+            return isExpression(start, end);
+        }
+        //return true;
+    }
+
+    boolean isExpression(int start, int end) {
+
+        int i = start;
+        boolean hasOP = false;
+        for (i = start; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".add.")
+                    || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".sub.")) {
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+            if (i == start || i == end) {
+                statement.setErrorMsg("expected an expression un +/- de mas");
+                statement.setErrorID(start);
+
+                return false;
+            }
+            return isExpression(start, i - 1) && isFactor(i + 1, end);
+        } else {
+            /*	if (isOperator(statement[i])) {
+				cout << "error 2ops de corrido" << endl;
+				return false;
+			}
+
+			else*/
+            return isFactor(start, end);
+        }
+        //return true;
+    }
+
+    boolean isFactor(int start, int end) {
+
+        boolean hasOP = false;
+        int i;
+        for (i = start; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".mul.")
+                    || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".div.")) {
+                hasOP = true;
+                break;
+            }
+        }
+
+        if (hasOP) {
+
+//		if (isStringVariable((statement[i + 1])) || isStringVariable((statement[i - 1])) || isString((statement[i + 1])) || isString((statement[i - 1]))) {
+//			printStatement(statement, i);
+//			cout << "opertator: " << statement[i] << " wrong operand data type" << endl;
+//			return false;
+//		}
+            return isFactor(start, i - 1) && isTerm(i + 1, end);
+        } else {
+            /*	if (isOperator(statement[i + 1])) {
+		cout << "error 2ops de corrido" << endl;
+		return false;
+		}
+		else*/
+            return isTerm(start, end);
+        }
+        //return true;
+    }
+
+    boolean isTerm(int start, int end) {
+
+        if (start < end) {
+            if ((statement.getStatement().get(start + 1) instanceof Operator)) {
+                return isLogicalExpression(start, end);
+            } else {
+                statement.setErrorID(end);
+                statement.setErrorMsg("missing operand");
+                return false;
+
+            }
+        } else if ((statement.getStatement().get(start) instanceof Variable)
+                || statement.getStatement().get(start) instanceof Literal
+                ) {
+            return true;
+
+        } else {
+            statement.setErrorID(end);
+            statement.printError();
+            System.out.println("expected variable, string or number");
+            statement.setErrorMsg("expected variable, string or number");
+            return false;
+
+        }
     }
 
     public boolean isAssigment(int start, int end) {
@@ -77,31 +323,14 @@ public class StatementParser {
     public boolean isArExpression(int start, int end) {
         int i;
         boolean hasOP = false;
-      
-             for (i = start; i < end; i++) {
+
+        for (i = start; i < end; i++) {
             if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".add.")
                     || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".sub.")) {
                 hasOP = true;
                 break;
             }
         }
-        
-        
-//        for (Token t : statement.getStatement()) {
-//            if (t.getIdentifier().equals(".add.") || t.getIdentifier().equals(".sub.")) {
-//                  i = statement.getStatement().indexOf(t);
-//                hasOP = true;
-//                break;
-//            }
-//        }
-//        for (i = start; i < end; i++) {
-//            if (statement.elementAt(i).getIdentifier().toLowerCase().equals(".add.")
-//                    || statement.elementAt(i).getIdentifier().toLowerCase().equals(".sub.")) {
-//                hasOP = true;
-//                break;
-//            }
-//        }
-
         if (hasOP) {
             if (i == start || i == end) {
                 statement.setErrorMsg("expected an expression un +/- de mas");
@@ -175,10 +404,6 @@ public class StatementParser {
     }
 
     boolean isArTerm(int start, int end) {
-        /*if (isOperator(statement[start]) || isOperator(statement[end]))
-		return false;*/
-        String pattern = new String("(-|\\+)?\\d+(\\.\\d+)?((e|E)(-|\\+)?\\d+)?");
-        String pattern2 = new String("(-|\\+)?(\\.\\d+)((e|E)(-|\\+)?\\d+)?");
 
         if (start < end) {
             if ((statement.getStatement().get(start + 1) instanceof Operator) //                    || isArithmeticOperator(statement[start + 1])
@@ -203,6 +428,8 @@ public class StatementParser {
         } else {
             // printStatement(statement, end);
             statement.setErrorID(end);
+            statement.printError();
+            System.out.println("expected variable, string or number");
             statement.setErrorMsg("expected variable, string or number");
             return false;
         }

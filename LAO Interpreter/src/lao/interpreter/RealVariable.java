@@ -13,6 +13,7 @@ package lao.interpreter;
  */
 public class RealVariable extends Variable {
     private double value;
+    private char type;
 
     public RealVariable(String identifier) {
         super(identifier);
@@ -24,6 +25,10 @@ public class RealVariable extends Variable {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    public char getType() {
+        return type;
     }
 
     @Override

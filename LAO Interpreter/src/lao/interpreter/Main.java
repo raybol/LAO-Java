@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Program: <b></b><br>
@@ -24,72 +25,60 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    
-
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        LaoInterpreter interp =new LaoInterpreter();
-        
-           int i = 1;
+        LaoInterpreter interp = new LaoInterpreter();
+
         try {
             File file = new File("code.txt");
-            FileReader fileReader = new FileReader(file);
+            FileReader fileReader;
+            fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            StringBuilder stringBuffer = new StringBuilder();
+            //  StringBuilder stringBuffer = new StringBuilder();
             String line;
-            ArrayList<String> v = new ArrayList<>();
+            //List<String> v = new ArrayList<>();
+            List<Statement> code = new ArrayList<>();
+            StatementParser parser = new StatementParser();
+            int i = 1;
+            boolean ok = true;
 
             while ((line = bufferedReader.readLine()) != null) {
-                v.add(line);
-               // System.out.println(line);
+              //  v.add(line);
+                Statement s = new Statement(line, i);
+//                if(s.getType()=='e')
+//                    break;
+                parser.setStatement(s);
+                interp.execute(s);
+                code.add(s);
+                i++;
+                // System.out.println(line);
             }
 
             fileReader.close();
 
-            for (String statement : v) {
-//                System.out.println(statement);
-//                System.out.println(i);
-//                i++;
-                if (statement != null && !statement.isEmpty()) {
-                   // System.out.println("statement:");
-                    Statement s = new Statement(statement);
-                    interp.execute(s);
-                  
-                  //  s.print();
-                    //execute(s);
-                }
-
-                //   System.out.println(s.getStatement().get(0).getIdentifier());
-            }
-
+//            //execute statements
+////            for (String statement : v) {
+////                if (statement != null && !statement.isEmpty()) {
+////                   
+////                    s.setLine(i);
+////                   ok= interp.execute(s);
+////                }
+////                if(!ok){ 
+////                    s.printError();
+////                    break;
+////                 
+////                    
+////                }
+////                
+////                   
+////                i++;
+////                //   System.out.println(s.getStatement().get(0).getIdentifier());
+////            }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("file not found");
         }
-       //   interp.printST();
-
-//        String s= new String("f");
-//     ArrayList<Variable> SymbolTable;
-//       ArrayList<Token> tokenTable=new ArrayList<>();
-//        Variable v =new IntVariable("a");
-//        Operator op1=new Operator(".and.");
-//        tokenTable.add(v);
-//        tokenTable.add(op1);
-//        Operator op2=op1;
-//          int i=0;
-//           i=  tokenTable.indexOf(op2);
-//          for(Token t :tokenTable){
-//            if (t instanceof Variable ) {
-//           
-//             System.out.println("in");
-//            }
-//        }
-  
-//        if(v instanceof Variable)
-//            System.out.println("ok");
-//        else
-//            System.out.println("nope");
     }
 
 }

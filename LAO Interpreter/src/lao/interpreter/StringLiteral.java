@@ -13,8 +13,14 @@ package lao.interpreter;
  */
 public class StringLiteral extends Literal{
     private String Value;
+    private char type;
     public StringLiteral(String identifier) {
         super(identifier);
+        type='s';
+    }
+
+    public char getType() {
+        return type;
     }
     
 
