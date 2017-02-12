@@ -34,13 +34,13 @@ public class Statement {
     public Statement(String aSstatement, int num) {
         validStatement = true;
         line=num;
-        statement = new ArrayList<Token>();
+        statement = new ArrayList<>();
         String[] operators = {".add.", ".sub.", ".mul.", ".div.", ".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne."};
         String[] keywords = {"if", "then", "read", "print", "end.", "rem","="};
-        String intPattern = new String("(-|\\+)?\\d+");
-        String realPattern1 = new String("(-|\\+)?\\d+(\\.\\d+)?((e|E)(-|\\+)?\\d+)?");
-        String realPattern2 = new String("(-|\\+)?(\\.\\d+)((e|E)(-|\\+)?\\d+)?");
-        String[] result = aSstatement.split("\\s");
+        String intPattern = "(-|\\+)?\\d+";
+        String realPattern1 = "(-|\\+)?\\d+(\\.\\d+)?((e|E)(-|\\+)?\\d+)?";
+        String realPattern2 = "(-|\\+)?(\\.\\d+)((e|E)(-|\\+)?\\d+)?";
+        //String[] result = aSstatement.split("\\s");
         Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(aSstatement);
         int qcount = countOccurrences(aSstatement, '"');
 
@@ -91,15 +91,15 @@ public class Statement {
         }
 
         if (validStatement) {
-            if (statement.get(0).getIdentifier().equals("rem")) {
+            if (statement.get(0).getIdentifier().toLowerCase().equals("rem")) {
                 type = 'c';
-            } else if (statement.get(0).getIdentifier().equals("print")) {
+            } else if (statement.get(0).getIdentifier().toLowerCase().equals("print")) {
                 type = 'p';
-            } else if (statement.get(0).getIdentifier().equals("read")) {
+            } else if (statement.get(0).getIdentifier().toLowerCase().equals("read")) {
                 type = 'r';
-            } else if (statement.get(0).getIdentifier().equals("if")) {
+            } else if (statement.get(0).getIdentifier().toLowerCase().equals("if")) {
                 type = 'i';
-            } else if (statement.get(0).getIdentifier().equals("end.")) {
+            } else if (statement.get(0).getIdentifier().toLowerCase().equals("end.")) {
                 type = 'e';
             } else if (statement.get(0) instanceof Variable) {
                 type = 'a';
@@ -146,25 +146,17 @@ public class Statement {
         this.type = type;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
-    }
 
-    public void setErrorMsg(String errorMsg) {
+
+    public void setError(int ID, String errorMsg) {
+         this.errorID = ID;
         this.errorMsg = errorMsg;
     }
 
-    public int getErrorID() {
-        return errorID;
-    }
-
-    public void setErrorID(int errorID) {
-        this.errorID = errorID;
-    }
-    
       public void printError() {
 
         System.out.println("ERROR ON LINE " + getLine());
+        printStatementType();
         for (int i = 0; i <= errorID; i++) {
             System.out.print(statement.get(i).getIdentifier() + " ");
         }
@@ -172,14 +164,39 @@ public class Statement {
           System.out.println(errorMsg);
 
     }
+      public void printStatementType(){
+          switch (type){
+                 case 'c':
+                break;
+            case 'p':
+                System.out.println("print statement");
+                break;
+            case 'r':
+                    System.out.println("read statement");
+                break;
+            case 'i':
+                    System.out.println("if/then statement");
+                break;
+            case 'e':
+                System.out.println("end statement");
+                break;
+            case 'a':
+                  System.out.println("assignment statement");
+                break;
+            case 'u':
+                 System.out.println("unknown statement");
+                break;
 
+          }
+      }
 
-    public void print() {
-        for (Token t : statement) {
-
-            System.out.println(t.getIdentifier());
-        }
-    }
+//
+//    public void print() {
+//        for (Token t : statement) {
+//
+//            System.out.println(t.getIdentifier());
+//        }
+//    }
 
     public static int countOccurrences(String haystack, char needle) {
         int count = 0;
@@ -194,7 +211,7 @@ public class Statement {
 //    public static  ArrayList<String> tokenizer(String aStatement){
 //        
 //    } 
-    public boolean isIntVariable(String identifier) {
+    public static boolean isIntVariable(String identifier) {
 
         boolean valid = false;
         if (((identifier.charAt(0) >= 'A' && identifier.charAt(0) <= 'F')
@@ -214,7 +231,7 @@ public class Statement {
         return valid;
     }
 
-    public boolean isRealVariable(String identifier) {
+    public static boolean isRealVariable(String identifier) {
 
         boolean valid = false;
         if (((identifier.charAt(0) >= 'G' && identifier.charAt(0) <= 'N')
@@ -232,7 +249,7 @@ public class Statement {
         return valid;
     }
 
-    public boolean isStringVariable(String identifier) {
+    public static boolean isStringVariable(String identifier) {
 
         boolean valid = false;
         if (((identifier.charAt(0) >= 'O' && identifier.charAt(0) <= 'Z')

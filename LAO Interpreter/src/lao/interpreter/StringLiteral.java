@@ -13,12 +13,13 @@ package lao.interpreter;
  */
 public class StringLiteral extends Literal{
     private String Value;
-    private char type;
+    private final char type;
     public StringLiteral(String identifier) {
         super(identifier);
         type='s';
     }
 
+    @Override
     public char getType() {
         return type;
     }

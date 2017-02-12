@@ -27,13 +27,13 @@ public class StatementParser {
         this.statement = statement;
     }
 
-    public boolean isComment() {
-
-        if (statement.getStatement().get(0).getIdentifier().equals("rem")) {
-            return true;
-        }
-        return false;
-    }
+//    public boolean isComment() {
+//
+//        if (statement.getStatement().get(0).getIdentifier().equals("rem")) {
+//            return true;
+//        }
+//        return false;
+//    }
     
     public boolean parse(){
              boolean ok = true;
@@ -76,15 +76,16 @@ public class StatementParser {
             return true;
         }
         // printStatement(statement, start);
-        System.out.println("expected variable, number or string");
+        statement.setError(end, "expected variable, number or string");
+        //System.out.println("expected variable, number or string");
         //    cout << "expected variable, number or string" << endl;
         return false;
     }
 
     boolean isConditionalExpression(int start, int end) {
         if (statement.getStatement().get(end) instanceof Operator) {
-            statement.setErrorMsg("missing operand");
-            statement.setErrorID(end);
+            statement.setError(end,"missing operand");
+
             return false;
         }
 //	if (isOperator(statement[end])) {
@@ -101,8 +102,8 @@ public class StatementParser {
         }
 
         if (!hasOp) {
-            statement.setErrorMsg("missing logical or relation operator");
-            statement.setErrorID(end);
+            statement.setError(end,"missing logical or relation operator");
+         
 //		printStatement(statement, end);
 //		cout << "missing logical or relation operator";
             return false;
@@ -146,6 +147,9 @@ public class StatementParser {
         }
 
         if (hasOP) {
+            if(i==start){
+            }else{
+            }
             return isNeg(i + 1, end);
         } else {
             return isEQExpression(start, end);
@@ -222,8 +226,8 @@ public class StatementParser {
 
         if (hasOP) {
             if (i == start || i == end) {
-                statement.setErrorMsg("expected an expression un +/- de mas");
-                statement.setErrorID(start);
+                statement.setError(start,"expected an expression un +/- de mas");
+       
 
                 return false;
             }
@@ -277,8 +281,8 @@ public class StatementParser {
             if ((statement.getStatement().get(start + 1) instanceof Operator)) {
                 return isLogicalExpression(start, end);
             } else {
-                statement.setErrorID(end);
-                statement.setErrorMsg("missing operand");
+
+                statement.setError(end,"missing operand");
                 return false;
 
             }
@@ -288,10 +292,10 @@ public class StatementParser {
             return true;
 
         } else {
-            statement.setErrorID(end);
-            statement.printError();
-            System.out.println("expected variable, string or number");
-            statement.setErrorMsg("expected variable, string or number");
+          
+            //statement.printError();
+          //  System.out.println("expected variable, string or number");
+            statement.setError(end,"expected variable, string or number");
             return false;
 
         }
@@ -301,7 +305,7 @@ public class StatementParser {
         // System.out.println("arexp");
         if (start == end) {
             //print(end);
-            statement.setErrorMsg("expected assingment");
+            statement.setError(start,"expected assingment");
             return false;
         }
 //            if (!((statement[start].isVariable))) {
@@ -333,7 +337,7 @@ public class StatementParser {
         }
         if (hasOP) {
             if (i == start || i == end) {
-                statement.setErrorMsg("expected an expression un +/- de mas");
+                statement.setError(i,"expected an expression");
                 return false;
             }
             return isArExpression(start, i - 1) && isArFactor(i + 1, end);
@@ -414,8 +418,8 @@ public class StatementParser {
                 return isArExpression(start, end);
             } else {
                 // printStatement(statement, end);
-                statement.setErrorID(end);
-                statement.setErrorMsg("missing operand");
+          
+                statement.setError(end,"missing operand");
                 return false;
             }
         } else if ((statement.getStatement().get(start) instanceof Variable)//                isRealwExp(statement[start])
@@ -427,10 +431,10 @@ public class StatementParser {
             return true;
         } else {
             // printStatement(statement, end);
-            statement.setErrorID(end);
-            statement.printError();
-            System.out.println("expected variable, string or number");
-            statement.setErrorMsg("expected variable, string or number");
+           // statement.setErrorID(end);
+          //  statement.printError();
+   //         System.out.println("expected variable, string or number");
+            statement.setError(end,"expected variable, string or number");
             return false;
         }
     }

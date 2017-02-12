@@ -11,7 +11,7 @@ package lao.interpreter;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class KeyWord extends Token {
-    private char type;
+    private final char type;
     public KeyWord(String identifier) {
         super(identifier);
         type='k';

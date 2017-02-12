@@ -12,10 +12,16 @@ package lao.interpreter;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class IntLiteral extends Literal{
-    int value;
+    private char type;
 
     public IntLiteral(String identifier) {
         super(identifier);
+        type='i';
+    }
+
+    @Override
+    public char getType() {
+        return type;
     }
     
     

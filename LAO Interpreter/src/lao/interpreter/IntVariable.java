@@ -13,7 +13,7 @@ package lao.interpreter;
  */
 public class IntVariable extends Variable {
     private int value;
-    private char type;
+    private final char type;
 
     public IntVariable(String identifier) {
         super(identifier);

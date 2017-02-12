@@ -12,10 +12,16 @@ package lao.interpreter;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class RealLiteral extends Literal{
-    private double value;
+   private final char type;
 
     public RealLiteral(String identifier) {
         super(identifier);
+        type='r';
+    }
+
+    @Override
+    public char getType() {
+        return type;
     }
     
 }

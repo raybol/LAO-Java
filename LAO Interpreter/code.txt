@@ -1,5 +1,8 @@
-w = "HOLA"
-y = " MUNDO"
+if 3.0 .gt. 3 then a = 2 .add. 1 .add. 3 .mul. 4
+print a
+w = "l" .add. "4"
+print w
+end.
 
-if 3 .gt. 2 then a = 2 .add. 1 .add. 3 .mul. 4
+
 

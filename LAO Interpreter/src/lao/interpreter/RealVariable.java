@@ -13,7 +13,7 @@ package lao.interpreter;
  */
 public class RealVariable extends Variable {
     private double value;
-    private char type;
+    private final char type;
 
     public RealVariable(String identifier) {
         super(identifier);

@@ -15,6 +15,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.Stack;
 
 /**
@@ -33,33 +34,37 @@ public class LaoInterpreter {
     }
 
     public void run() {
-        int i = 1;
         try {
             File file = new File("code.txt");
-            FileReader fileReader = new FileReader(file);
+            FileReader fileReader;
+            fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            StringBuilder stringBuffer = new StringBuilder();
+
             String line;
-            ArrayList<String> v = new ArrayList<>();
+
+            List<Statement> code = new ArrayList<>();
+            StatementParser parser = new StatementParser();
+            int i = 1;
+            boolean ok;
 
             while ((line = bufferedReader.readLine()) != null) {
-                v.add(line);
-                System.out.println(line);
+                //  v.add(line);
+                Statement s = new Statement(line, i);
+//                if(s.getType()=='e')
+//                    break;
+                parser.setStatement(s);
+                ok = execute(s);
+                if (!ok) {
+                    s.printError();
+                    break;
+                }
+
+                code.add(s);
+                i++;
+                // System.out.println(line);
             }
 
             fileReader.close();
-
-            for (String statement : v) {
-//                System.out.println(statement);
-//                System.out.println(i);
-
-                if (statement != null && !statement.isEmpty()) {
-                    Statement s = new Statement(statement, i);
-                    execute(s);
-                }
-                i++;
-                //   System.out.println(s.getStatement().get(0).getIdentifier());
-            }
 
         } catch (IOException e) {
             System.out.println("file not found");
@@ -74,19 +79,20 @@ public class LaoInterpreter {
             case 'c':
                 break;
             case 'p':
-                executePrint(0, aStatement.getStatement().size() - 1);
+                ok = executePrint(0, aStatement.getStatement().size() - 1);
                 break;
             case 'r':
+                ok = executeRead(0, aStatement.getStatement().size() - 1);
                 break;
             case 'i':
+                ok = executeIF();
                 break;
             case 'e':
-                 System.exit(0);
+                System.exit(0);
                 break;
             case 'a':
-                ok = executeAssignment();
+                ok = executeAssignment(0);
                 break;
-
             case 'u':
                 break;
 
@@ -103,47 +109,86 @@ public class LaoInterpreter {
         }
     }
 
-    public boolean executeAssignment() {
+    public boolean executeIF() {
+
+        int end = currentStatement.getStatement().size();
+        currentStatement.getStatement().subList(2, end);
+        //evaluate expression
+        // found=false;
+        int i = 0;
+        //  int index=0;
+        for (Token t : currentStatement.getStatement()) {
+            if (t.getIdentifier().toLowerCase().equals("then")) {
+                //found = true;
+                //  index=i;
+                break;
+            }
+            i++;
+        }
+
+        if (evaluateExpression(currentStatement.getStatement().subList(1, i))) {
+
+            // currentStatement.getStatement().subList(2, end);
+            //evaluate expression
+            if (((BoolLiteral) result).isTrue()) {
+                if (currentStatement.getStatement().get(i + 1) instanceof Variable) {
+                    return executeAssignment(i + 1);
+                } else if (currentStatement.getStatement().get(i + 1) instanceof KeyWord) {
+                    if (currentStatement.getStatement().get(i + 1).getIdentifier().toLowerCase().equals("print")) {
+                        return executePrint(i + 1, end - 1);
+                    } else if (currentStatement.getStatement().get(i + 1).getIdentifier().toLowerCase().equals("read")) {
+                        return executeRead(i + 1, end - 1);
+                    }
+                }
+            }
+
+            //  return true;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean executeAssignment(int start) {
 
         sParser.setStatement(currentStatement);
         // System.out.println(aStatement.getSize() );
-        if (sParser.isAssigment(0, currentStatement.getStatement().size() - 1)) {
+        if (sParser.isAssigment(start, currentStatement.getStatement().size() - 1)) {
 
             int end = currentStatement.getStatement().size();
-            currentStatement.getStatement().subList(2, end);
+            // currentStatement.getStatement().subList(2, end);
             //evaluate expression
 
-            evaluateExpression(currentStatement.getStatement().subList(2, end));
+            evaluateExpression(currentStatement.getStatement().subList(start + 2, end));
 
             //assignment
-            Variable var = (Variable) currentStatement.getStatement().get(0);
-            if(var.getType()==result.getType()){
-            if (var instanceof IntVariable) {
-                IntVariable v = (IntVariable) (var);
-                if (result instanceof IntLiteral) {
-                    v.setValue(Integer.parseInt(result.getIdentifier()));
+            Variable var = (Variable) currentStatement.getStatement().get(start);
+            if (var.getType() == result.getType()) {
+                if (var instanceof IntVariable) {
+                    IntVariable v = (IntVariable) (var);
+                    if (result instanceof IntLiteral) {
+                        v.setValue(Integer.parseInt(result.getIdentifier()));
+                        SymbolTable.add(v);
+                    } else {
+                        return false;
+                    }
+                } else if (var instanceof RealVariable) {
+                    RealVariable v = (RealVariable) (var);
+                    v.setValue(Double.parseDouble(result.getIdentifier()));
                     SymbolTable.add(v);
-                } else {
-                    return false;
+                } else if (var instanceof StringVariable) {
+                    StringVariable v = (StringVariable) (var);
+                    v.setValue(result.getIdentifier());
+                    SymbolTable.add(v);
                 }
-            } else if (var instanceof RealVariable) {
-                RealVariable v = (RealVariable) (var);
 
-                SymbolTable.add(v);
-            } else if (var instanceof StringVariable) {
-                
-                StringVariable v = (StringVariable) (var);
-                v.setValue(result.getIdentifier());
-                SymbolTable.add(v);
-            }
-            
-            }else{
-              // currentStatement.printError();
+            } else {
+                // currentStatement.printError();
                 //System.out.println("expression returned wrong type");
-                currentStatement.setErrorID(1);
-                currentStatement.setErrorMsg("expression returned wrong type");
+              
+                currentStatement.setError(start + 1,"expression returned wrong type");
                 return false;
-            }            
+            }
 
             return true;
             //Variable v = (Variable) (aStatement.getStatement().get(2));
@@ -173,7 +218,9 @@ public class LaoInterpreter {
                     if (found) {  //print variable
                         System.out.println(var.toString());
                     } else {//variable not found
-                        System.out.println("undeclared variable " + var.getIdentifier());
+                        currentStatement.setError(1, "undeclared variable " + var.getIdentifier());
+                  
+                        //System.out.println("undeclared variable " + var.getIdentifier());
                         return false;
                     }
 
@@ -186,6 +233,28 @@ public class LaoInterpreter {
         } else {
             return false;
         }
+    }
+
+    public boolean executeRead(int start, int end) {
+        Scanner input = new Scanner(System.in);
+        Variable var = (Variable) currentStatement.getStatement().get(1);
+        if (var instanceof IntVariable) {
+            IntVariable v = (IntVariable) (var);
+            try {
+                v.setValue(Integer.parseInt(input.nextLine()));
+                SymbolTable.add(v);
+            } catch (Exception e) {
+                currentStatement.setError(end,"must enter integer");
+  
+                //  System.out.println("must enter integer");
+                return false;
+            }
+
+        } else if (var instanceof RealVariable) {
+
+        } else if (var instanceof StringVariable) {
+        }
+        return true;
     }
 
     public boolean evaluateExpression(List<Token> expression) {
@@ -211,11 +280,11 @@ public class LaoInterpreter {
                         expression.set(i, literal);
                     } else if (var instanceof RealVariable) {
                         Double val = ((RealVariable) var).getValue();
-                        RealVariable literal = new RealVariable(val.toString());
+                        RealLiteral literal = new RealLiteral(val.toString());
                         expression.set(i, literal);
                     } else if (var instanceof StringVariable) {
                         String val = ((StringVariable) var).getValue();
-                        StringVariable literal = new StringVariable(val);
+                        StringLiteral literal = new StringLiteral(val);
                         expression.set(i, literal);
                     }
                 } else {
@@ -248,7 +317,7 @@ public class LaoInterpreter {
             postfix.add(opStack.peek());
             opStack.pop();
         }
-
+        boolean ok = true;
         while (!postfix.isEmpty()) {
 
             if (postfix.peek() instanceof Operator) {
@@ -265,6 +334,12 @@ public class LaoInterpreter {
                     case 4:
                         break;
                     case 5:
+                        v2 = (Literal) expStack.peek();
+                        expStack.pop();
+                        v1 = (Literal) expStack.peek();
+                        expStack.pop();
+                        ok = relataion((Operator) postfix.peek(), v1, v2);
+                        expStack.push(result);
                         break;
                     case 6:
                         //System.out.println("adding");
@@ -273,8 +348,8 @@ public class LaoInterpreter {
                         expStack.pop();
                         v1 = (Literal) expStack.peek();
                         expStack.pop();
-                        addsub((Operator) postfix.peek(), v1, v2);
-                        postfix.poll();
+                        ok = addsub((Operator) postfix.peek(), v1, v2);
+                        //   postfix.poll();
                         expStack.push(result);
                         break;
                     case 7:
@@ -282,7 +357,7 @@ public class LaoInterpreter {
                         expStack.pop();
                         v1 = (Literal) expStack.peek();
                         expStack.pop();
-                        muldiv((Operator) postfix.peek(), v1, v2);
+                        ok = muldiv((Operator) postfix.peek(), v1, v2);
                         expStack.push(result);
                         break;
                 }
@@ -293,8 +368,69 @@ public class LaoInterpreter {
                 expStack.push(postfix.peek());
                 postfix.poll();
             }
+            if (!ok) {
+                return false;
+            }
         }
         result = expStack.peek();
+        return true;
+    }
+
+    public boolean relataion(Operator op, Literal v1, Literal v2) {
+//        if (op.getIdentifier().equals(".gt.")) {}
+//        else if (op.getIdentifier().equals(".lt.")) {}
+//         else if (op.getIdentifier().equals(".ge.")) {}
+//           else if (op.getIdentifier().equals(".le.")) {}
+
+        BoolLiteral l = new BoolLiteral("bool");
+        int r;
+        Double d1 = Double.parseDouble(v1.getIdentifier());
+        Double d2 = Double.parseDouble(v2.getIdentifier());
+        if (v1 instanceof StringLiteral || v2 instanceof StringLiteral) {
+            if (v1 instanceof StringLiteral && v2 instanceof StringLiteral) {
+                r = v1.getIdentifier().compareTo(v2.getIdentifier());
+            } else {
+                return false;
+            }
+        } else {
+            r = d1.compareTo(d2);
+        }
+
+        switch (op.getIdentifier()) {
+            case ".gt.":
+                if (r > 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+            case ".lt.":
+                if (r < 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+            case ".ge.":
+                if (r >= 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+            case ".le.":
+                if (r <= 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+        }
+
         return true;
     }
 

@@ -13,7 +13,7 @@ package lao.interpreter;
  */
 public abstract class Token {
     private String Identifier;
-
+    
     public Token(String Identifier) {
         this.Identifier = Identifier;
     }
@@ -25,8 +25,7 @@ public abstract class Token {
     public void setIdentifier(String Identifier) {
         this.Identifier = Identifier;
     }
-
+    
     public abstract char getType();
-    
-    
+       
 }

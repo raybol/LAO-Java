@@ -13,7 +13,7 @@ import java.util.Arrays;
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class Operator extends Token {
-    private char type;
+    private final char type;
     private int prescedence;
 
     public Operator(String identifier) {

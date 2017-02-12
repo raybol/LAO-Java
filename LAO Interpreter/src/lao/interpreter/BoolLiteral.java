@@ -8,22 +8,29 @@
 package lao.interpreter;
 
 /**
- * Program: <b></b><br>
- * Date : <br>
- * Description:<br>
- * <br>
- * <br>
- *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public class Main {
+public class BoolLiteral extends Literal {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        LaoInterpreter interpreter = new LaoInterpreter();
-        interpreter.run();
+    private boolean value;
+    private final char type;
+
+    public BoolLiteral(String identifier) {
+        super(identifier);
+        this.type = 'b';
+    }
+
+    public boolean isTrue() {
+        return value;
+    }
+
+    public void setValue(boolean value) {
+        this.value = value;
+    }
+
+    @Override
+    public char getType() {
+        return type;
     }
 
 }
