@@ -18,96 +18,103 @@ import java.util.regex.Pattern;
  */
 public class Statement {
 
-    private List<Token> statement; 
+    private List<Token> statement;
+    private String stringStatement;
     private int line;
     private int size;
     private char type;
     private String errorMsg;
     private int errorID;
     private boolean validStatement;
-   
 
     public Statement(ArrayList<Token> statement) {
         this.statement = statement;
     }
 
     public Statement(String aSstatement, int num) {
+        stringStatement = aSstatement;
         validStatement = true;
-        line=num;
+        line = num;
         statement = new ArrayList<>();
         String[] operators = {".add.", ".sub.", ".mul.", ".div.", ".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne."};
-        String[] keywords = {"if", "then", "read", "print", "end.", "rem","="};
+        String[] keywords = {"if", "then", "read", "print", "end.", "rem", "="};
         String intPattern = "(-|\\+)?\\d+";
         String realPattern1 = "(-|\\+)?\\d+(\\.\\d+)?((e|E)(-|\\+)?\\d+)?";
         String realPattern2 = "(-|\\+)?(\\.\\d+)((e|E)(-|\\+)?\\d+)?";
         //String[] result = aSstatement.split("\\s");
         Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(aSstatement);
         int qcount = countOccurrences(aSstatement, '"');
-
+        boolean balanced = (qcount % 2 == 0);
+        int i = 0;
 //        System.out.println(qcount);
 //        System.out.println(aSstatement.lastIndexOf('"'));
-        if (qcount % 2 == 0) {
-            while (m.find()) {
-                // statement.add(m.group(1));
+        // if (qcount % 2 == 0) {
+        while (m.find()) {
+            // statement.add(m.group(1));
 
-                // for (String token : result) {
-                // System.out.println(m.group(1));
-                if (m.groupCount() > 1) {
-                    // System.out.println(m.group());
-                }
-                if (Arrays.asList(operators).contains(m.group(1).toLowerCase())) {
-                    Operator t = new Operator(m.group(1));
-                    statement.add(t);
-                } else if (Arrays.asList(keywords).contains(m.group(1).toLowerCase())) {
-                    KeyWord t = new KeyWord(m.group(1));
-                    statement.add(t);
-                } else if (m.group(1).matches(intPattern)) {
-                    IntLiteral t = new IntLiteral(m.group(1));
-                    statement.add(t);
-                } else if (m.group(1).matches(realPattern1) || m.group(1).matches(realPattern2)) {
-                    RealLiteral t = new RealLiteral(m.group(1));
-                    statement.add(t);
-                } else if (m.group(1).charAt(0) == '"') {
-                    StringLiteral t = new StringLiteral(m.group(1).replace("\"", ""));
-                    statement.add(t);
-                } else if (isIntVariable(m.group(1))) {
-                    IntVariable t = new IntVariable(m.group(1));
-                    statement.add(t);
-                } else if (isRealVariable(m.group(1))) {
-                    RealVariable t = new RealVariable(m.group(1));
-                    statement.add(t);
-                } else if (isStringVariable(m.group(1))) {
-                    StringVariable t = new StringVariable(m.group(1));
-                    statement.add(t);
-                } else {
-                    validStatement = false;
-                    errorMsg = "unkown identifier";
-                }
+            // for (String token : result) {
+            // System.out.println(m.group(1));
+            if (m.groupCount() > 1) {
+                // System.out.println(m.group());
             }
+            if (Arrays.asList(operators).contains(m.group(1).toLowerCase())) {
+                Operator t = new Operator(m.group(1));
+                statement.add(t);
+            } else if (Arrays.asList(keywords).contains(m.group(1).toLowerCase())) {
+                KeyWord t = new KeyWord(m.group(1));
+                statement.add(t);
+            } else if (m.group(1).matches(intPattern)) {
+                IntLiteral t = new IntLiteral(m.group(1));
+                statement.add(t);
+            } else if (m.group(1).matches(realPattern1) || m.group(1).matches(realPattern2)) {
+                RealLiteral t = new RealLiteral(m.group(1));
+                statement.add(t);
+            } else if (m.group(1).charAt(0) == '"') {
+                StringLiteral t = new StringLiteral(m.group(1).replace("\"", ""));
+                statement.add(t);
+            } else if (isIntVariable(m.group(1))) {
+                IntVariable t = new IntVariable(m.group(1));
+                statement.add(t);
+            } else if (isRealVariable(m.group(1))) {
+                RealVariable t = new RealVariable(m.group(1));
+                statement.add(t);
+            } else if (isStringVariable(m.group(1))) {
+                StringVariable t = new StringVariable(m.group(1));
+                statement.add(t);
+            } else {
+                System.out.println(m.group(1).toLowerCase());
+                validStatement = false;
+                errorMsg = "unkown identifier: " + m.group(1).toLowerCase() ;
+                errorID = i - 1;
+            }
+            i++;
+        }
+
+        if (statement.get(0).getIdentifier().toLowerCase().equals("rem")) {
+            type = 'c';
+        } else if (statement.get(0).getIdentifier().toLowerCase().equals("print")) {
+            type = 'p';
+        } else if (statement.get(0).getIdentifier().toLowerCase().equals("read")) {
+            type = 'r';
+        } else if (statement.get(0).getIdentifier().toLowerCase().equals("if")) {
+            type = 'i';
+        } else if (statement.get(0).getIdentifier().toLowerCase().equals("end.")) {
+            type = 'e';
+        } else if (statement.get(0) instanceof Variable) {
+            type = 'a';
         } else {
+            type = 'u';
+        }
+        // System.out.println("done");
+        //print();
+        if (!balanced) {
             validStatement = false;
             errorMsg = "unbalanced statement missing quote sign";
-            
+            errorID=i-1;
         }
 
-        if (validStatement) {
-            if (statement.get(0).getIdentifier().toLowerCase().equals("rem")) {
-                type = 'c';
-            } else if (statement.get(0).getIdentifier().toLowerCase().equals("print")) {
-                type = 'p';
-            } else if (statement.get(0).getIdentifier().toLowerCase().equals("read")) {
-                type = 'r';
-            } else if (statement.get(0).getIdentifier().toLowerCase().equals("if")) {
-                type = 'i';
-            } else if (statement.get(0).getIdentifier().toLowerCase().equals("end.")) {
-                type = 'e';
-            } else if (statement.get(0) instanceof Variable) {
-                type = 'a';
-            } else {
-                type = 'u';
-            }
-        }
-
+        //  if (validStatement) {
+        // }
     }
 
     public List<Token> getStatement() {
@@ -146,57 +153,62 @@ public class Statement {
         this.type = type;
     }
 
-
-
     public void setError(int ID, String errorMsg) {
-         this.errorID = ID;
+        this.errorID = ID;
         this.errorMsg = errorMsg;
     }
-
-      public void printError() {
+    /**
+     * 
+     */
+    public void printError() {
 
         System.out.println("ERROR ON LINE " + getLine());
+        System.out.println(stringStatement);
         printStatementType();
-        for (int i = 0; i <= errorID; i++) {
-            System.out.print(statement.get(i).getIdentifier() + " ");
+        if (!statement.isEmpty()) {
+            for (int i = 0; i <= errorID; i++) {
+                System.out.print(statement.get(i).getIdentifier() + " ");
+            }
         }
+
         System.out.println(" ");
-          System.out.println(errorMsg);
+        System.out.println(errorMsg);
 
     }
-      public void printStatementType(){
-          switch (type){
-                 case 'c':
+
+    public void printStatementType() {
+        switch (type) {
+            case 'c':
                 break;
             case 'p':
                 System.out.println("print statement");
                 break;
             case 'r':
-                    System.out.println("read statement");
+                System.out.println("read statement");
                 break;
             case 'i':
-                    System.out.println("if/then statement");
+                System.out.println("if/then statement");
                 break;
             case 'e':
                 System.out.println("end statement");
                 break;
             case 'a':
-                  System.out.println("assignment statement");
+                System.out.println("assignment statement");
                 break;
             case 'u':
-                 System.out.println("unknown statement");
+                System.out.println("unknown statement");
                 break;
 
-          }
-      }
+        }
+    }
 
 //
-//    public void print() {
-//        for (Token t : statement) {
-//
-//            System.out.println(t.getIdentifier());
-//        }
-//    }
+    public void print() {
+        for (Token t : statement) {
+
+            System.out.println(t.getIdentifier());
+        }
+    }
 
     public static int countOccurrences(String haystack, char needle) {
         int count = 0;

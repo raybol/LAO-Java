@@ -34,35 +34,35 @@ public class StatementParser {
 //        }
 //        return false;
 //    }
-    
-    public boolean parse(){
-             boolean ok = true;
-      
+    public boolean parse() {
+        boolean ok = true;
+
         switch (statement.getType()) {
             case 'c':
                 break;
             case 'p':
-                isPrint(0, statement.getStatement().size() - 1);
+                ok = isPrint(0, statement.getStatement().size() - 1);
                 break;
             case 'r':
                 break;
             case 'i':
+                ok = isIfStatement();
                 break;
             case 'e':
-               
+
                 break;
             case 'a':
                 ok = isAssigment(0, statement.getStatement().size() - 1);
                 break;
 
             case 'u':
-                ok=false;
+                ok = false;
                 break;
 
         }
         return ok;
     }
-    
+
     public boolean isPrint(int start, int end) {
 
         if ((end - start) == 1) {//isVariable(statement[start + 1]) ||
@@ -82,9 +82,84 @@ public class StatementParser {
         return false;
     }
 
+    boolean isPrintStatement(int start, int end) {
+//	if (!(statement[start].toLower() == "print")) {
+//		cout << "error1" << endl;
+//		return false;
+//	}
+
+        if ((end - start) == 1) {//isVariable(statement[start + 1]) ||
+            if (statement.getStatement().get(start + 1) instanceof Variable || statement.getStatement().get(start + 1) instanceof Literal) {
+                return true;
+            }
+
+        } else if (end == start) {
+            return true;
+        }
+        statement.setError(start, "expected variable, number or string");
+//	printStatement(statement, start);
+//	cout << "expected variable, number or string" << endl;
+        return false;
+    }
+
+    boolean isReadStatement(int start, int end) {
+//	if (statement[start].toLower() == "read") {
+        if ((end - start) == 1) {
+            if (statement.getStatement().get(start + 1) instanceof Variable) {
+                return true;
+            }
+        }
+//	}
+        statement.setError(start, "print must be followed by 1 variable");
+        return false;
+    }
+
+    boolean isIfStatement() {
+        //If
+//        if (!(statement[start].toLower() == "if")) {
+//                return false;
+//        }
+
+        int i;
+        int start = 0;
+        int end = statement.getStatement().size()-1;
+        boolean hasThen = false;
+        for (i = 1; i < end; i++) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals( "then") ) {
+                hasThen = true;
+                break;
+            }
+        }
+        if (!hasThen) {
+            statement.setError(i, "missing then part");
+//		printStatement(statement, i);
+//		cout << "missing then part" << endl;
+            return false;
+        }
+        if (i == end) {
+            statement.setError(i, "missing condition");
+//		printStatement(i, "missing condition");
+//		cout << "missing condition" << endl;
+            return false;
+        }
+
+        //condition
+        if (isConditionalExpression(start + 1, i - 1)) {
+            if ("read".equals(statement.getStatement().get(i + 1).getIdentifier().toLowerCase())) {
+                return isReadStatement(i + 1, end);
+            } else if ("print".equals(statement.getStatement().get(i + 1).getIdentifier().toLowerCase())) {
+                return isPrintStatement(i + 1, end);
+            } else if (statement.getStatement().get(i + 1) instanceof Variable) {
+                return isAssigment(i + 1, end);
+            }
+        }
+
+        return false;
+    }
+
     boolean isConditionalExpression(int start, int end) {
         if (statement.getStatement().get(end) instanceof Operator) {
-            statement.setError(end,"missing operand");
+            statement.setError(end, "missing operand");
 
             return false;
         }
@@ -102,8 +177,8 @@ public class StatementParser {
         }
 
         if (!hasOp) {
-            statement.setError(end,"missing logical or relation operator");
-         
+            statement.setError(end, "missing logical or relation operator");
+
 //		printStatement(statement, end);
 //		cout << "missing logical or relation operator";
             return false;
@@ -147,10 +222,12 @@ public class StatementParser {
         }
 
         if (hasOP) {
-            if(i==start){
-            }else{
-            }
-            return isNeg(i + 1, end);
+            if (i == start) {
+                return isNeg(i + 1, end);
+            } else {
+                return isNeg(start, i - 1) && isEQExpression(i + 1, end);
+            }//isNeg(i + 1, end)
+           
         } else {
             return isEQExpression(start, end);
         }
@@ -182,7 +259,7 @@ public class StatementParser {
     boolean isRelationalexpression(int start, int end) {
 
         boolean hasOP = false;
-        int i = start;
+        int i ;
 
         String[] operators = {".gt.", ".lt.", ".ge.", ".le."};
         for (i = start; i < end; i++) {
@@ -226,8 +303,7 @@ public class StatementParser {
 
         if (hasOP) {
             if (i == start || i == end) {
-                statement.setError(start,"expected an expression un +/- de mas");
-       
+                statement.setError(start, "expected an expression un +/- de mas");
 
                 return false;
             }
@@ -282,20 +358,19 @@ public class StatementParser {
                 return isLogicalExpression(start, end);
             } else {
 
-                statement.setError(end,"missing operand");
+                statement.setError(end, "missing operand");
                 return false;
 
             }
         } else if ((statement.getStatement().get(start) instanceof Variable)
-                || statement.getStatement().get(start) instanceof Literal
-                ) {
+                || statement.getStatement().get(start) instanceof Literal) {
             return true;
 
         } else {
-          
+
             //statement.printError();
-          //  System.out.println("expected variable, string or number");
-            statement.setError(end,"expected variable, string or number");
+            //  System.out.println("expected variable, string or number");
+            statement.setError(end, "expected variable, string or number");
             return false;
 
         }
@@ -305,7 +380,7 @@ public class StatementParser {
         // System.out.println("arexp");
         if (start == end) {
             //print(end);
-            statement.setError(start,"expected assingment");
+            statement.setError(start, "expected assingment");
             return false;
         }
 //            if (!((statement[start].isVariable))) {
@@ -337,7 +412,7 @@ public class StatementParser {
         }
         if (hasOP) {
             if (i == start || i == end) {
-                statement.setError(i,"expected an expression");
+                statement.setError(i, "expected an expression");
                 return false;
             }
             return isArExpression(start, i - 1) && isArFactor(i + 1, end);
@@ -410,7 +485,7 @@ public class StatementParser {
     boolean isArTerm(int start, int end) {
 
         if (start < end) {
-            if ((statement.getStatement().get(start + 1) instanceof Operator) //                    || isArithmeticOperator(statement[start + 1])
+            if ((statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".add.") ) //                    || isArithmeticOperator(statement[start + 1])
                     //                    || isRelationalOperator(statement[start + 1])
                     //                    || statement[start + 1].toLower() == ".or."
                     //                    || statement[start + 1].toLower() == ".and."
@@ -418,8 +493,8 @@ public class StatementParser {
                 return isArExpression(start, end);
             } else {
                 // printStatement(statement, end);
-          
-                statement.setError(end,"missing operand");
+
+                statement.setError(end, "missing or wrong operand");
                 return false;
             }
         } else if ((statement.getStatement().get(start) instanceof Variable)//                isRealwExp(statement[start])
@@ -431,10 +506,10 @@ public class StatementParser {
             return true;
         } else {
             // printStatement(statement, end);
-           // statement.setErrorID(end);
-          //  statement.printError();
-   //         System.out.println("expected variable, string or number");
-            statement.setError(end,"expected variable, string or number");
+            // statement.setErrorID(end);
+            //  statement.printError();
+            //         System.out.println("expected variable, string or number");
+            statement.setError(end, "expected variable, string or number");
             return false;
         }
     }

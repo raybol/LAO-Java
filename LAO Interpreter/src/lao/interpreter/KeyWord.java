@@ -18,6 +18,7 @@ public class KeyWord extends Token {
     }
 
     public char getType() {
+      
         return type;
     }
 

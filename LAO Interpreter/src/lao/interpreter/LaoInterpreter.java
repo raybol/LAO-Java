@@ -33,6 +33,9 @@ public class LaoInterpreter {
         sParser = new StatementParser();
     }
 
+    /**
+     * Startup method read from file and calls execute function
+     */
     public void run() {
         try {
             File file = new File("code.txt");
@@ -49,29 +52,55 @@ public class LaoInterpreter {
 
             while ((line = bufferedReader.readLine()) != null) {
                 //  v.add(line);
-                Statement s = new Statement(line, i);
+                if (line != null && !line.isEmpty()) {
+                    Statement s = new Statement(line, i);
 //                if(s.getType()=='e')
 //                    break;
-                parser.setStatement(s);
-                ok = execute(s);
-                if (!ok) {
-                    s.printError();
-                    break;
-                }
+                    if (s.isValidStatement()) {
+                        parser.setStatement(s);
+                        ok = parser.parse();
+                        if (ok) {
 
-                code.add(s);
+                            ok = execute(s);
+                            if (!ok) {
+                                   
+                                s.printError();
+                                System.exit(0);
+                                //break;
+                            }
+                        } else {
+                            System.out.println("bad parse");
+                            s.printError();
+                         System.exit(0);
+                        }
+
+                        code.add(s);
+
+                    } else {
+                        System.out.println("error exit");
+                        s.printError();
+                     //   System.exit(0);
+                       System.exit(0);
+                    }
+                }
                 i++;
-                // System.out.println(line);
+
             }
 
             fileReader.close();
-
+            System.out.println("ended before end.");
         } catch (IOException e) {
             System.out.println("file not found");
         }
 
     }
 
+    /**
+     * Decides which type of statement will be executed
+     *
+     * @param aStatement statement that will be executed
+     * @return returns true if statement was properly executed
+     */
     public boolean execute(Statement aStatement) {
         boolean ok = true;
         currentStatement = aStatement;
@@ -100,15 +129,19 @@ public class LaoInterpreter {
         return ok;
     }
 
-    public void printST() {
-        for (Variable v : SymbolTable) {
-            System.out.println(v.getIdentifier());
-            StringVariable sv = (StringVariable) v;
-            System.out.println(sv.getValue());
-
-        }
-    }
-
+//    public void printST() {
+//        for (Variable v : SymbolTable) {
+//            System.out.println(v.getIdentifier());
+//            StringVariable sv = (StringVariable) v;
+//            System.out.println(sv.getValue());
+//
+//        }
+//    }
+    /**
+     * Executes an if/then statement
+     *
+     * @return Returns true if the statement was properly executed
+     */
     public boolean executeIF() {
 
         int end = currentStatement.getStatement().size();
@@ -149,6 +182,12 @@ public class LaoInterpreter {
         return true;
     }
 
+    /**
+     * Executes and assignment statement
+     *
+     * @param start Starting position of the assign on the statement
+     * @return returns true if statement was successfully executed
+     */
     public boolean executeAssignment(int start) {
 
         sParser.setStatement(currentStatement);
@@ -185,8 +224,8 @@ public class LaoInterpreter {
             } else {
                 // currentStatement.printError();
                 //System.out.println("expression returned wrong type");
-              
-                currentStatement.setError(start + 1,"expression returned wrong type");
+
+                currentStatement.setError(start + 1, "expression returned wrong type");
                 return false;
             }
 
@@ -197,19 +236,24 @@ public class LaoInterpreter {
             return false;
         }
     }
-
+/**
+ * Executes a print statement
+ * @param start stating position of the print
+ * @param end ending position of the print
+ * @return returns true if statement was successfully executed
+ */
     public boolean executePrint(int start, int end) {
         sParser.setStatement(currentStatement);
         if (sParser.isPrint(start, currentStatement.getStatement().size() - 1)) {
             if (currentStatement.getStatement().size() == 1) {
                 System.out.println("");
-            } else if (currentStatement.getStatement().size() == 2) {
+            } else if (end - start == 1) {//currentStatement.getStatement().size()
 
-                if (currentStatement.getStatement().get(1) instanceof Variable) {
+                if (currentStatement.getStatement().get(end) instanceof Variable) {
                     boolean found = false;
-                    Variable var = (Variable) currentStatement.getStatement().get(1);
+                    Variable var = (Variable) currentStatement.getStatement().get(end);
                     for (Variable v : SymbolTable) {
-                        if (v.getIdentifier().equals(var.getIdentifier())) {
+                        if (v.getIdentifier().toLowerCase().equals(var.getIdentifier().toLowerCase())) {
                             found = true;
                             var = v;
                             break;
@@ -218,8 +262,8 @@ public class LaoInterpreter {
                     if (found) {  //print variable
                         System.out.println(var.toString());
                     } else {//variable not found
-                        currentStatement.setError(1, "undeclared variable " + var.getIdentifier());
-                  
+                        currentStatement.setError(start, "undeclared variable: " + var.getIdentifier());
+
                         //System.out.println("undeclared variable " + var.getIdentifier());
                         return false;
                     }
@@ -235,6 +279,12 @@ public class LaoInterpreter {
         }
     }
 
+    /**
+     * Executes a read statement
+     * @param start Starting position of the read in the statement
+     * @param end Ending position of the read in the statement
+     * @return returns true if statement was successfully executed
+     */
     public boolean executeRead(int start, int end) {
         Scanner input = new Scanner(System.in);
         Variable var = (Variable) currentStatement.getStatement().get(1);
@@ -244,19 +294,38 @@ public class LaoInterpreter {
                 v.setValue(Integer.parseInt(input.nextLine()));
                 SymbolTable.add(v);
             } catch (Exception e) {
-                currentStatement.setError(end,"must enter integer");
-  
+                currentStatement.setError(end, "must enter integer");
+
                 //  System.out.println("must enter integer");
                 return false;
             }
 
         } else if (var instanceof RealVariable) {
 
+            RealVariable v = (RealVariable) (var);
+            try {
+                v.setValue(Double.parseDouble(input.nextLine()));
+                SymbolTable.add(v);
+            } catch (Exception e) {
+                currentStatement.setError(end, "must enter real numeber");
+
+                //  System.out.println("must enter integer");
+                return false;
+            }
+
         } else if (var instanceof StringVariable) {
+            StringVariable v = (StringVariable) (var);
+
+            v.setValue((input.nextLine()));
+            SymbolTable.add(v);
         }
         return true;
     }
-
+/**
+ * Evaluates logical/conditional/arithmetic expressions
+ * @param expression Expression to be evaluated
+ * @return returns true if expression successfully evaluated
+ */
     public boolean evaluateExpression(List<Token> expression) {
         //switch variables for literals
         for (Token t : expression) {
@@ -326,12 +395,34 @@ public class LaoInterpreter {
                 Literal v1;
                 switch (((Operator) postfix.peek()).getPrescedence()) {
                     case 1:
+                        v2 = (Literal) expStack.peek();
+                        expStack.pop();
+                        v1 = (Literal) expStack.peek();
+                        expStack.pop();
+                        ok = or( v1, v2);
+                        expStack.push(result);
                         break;
                     case 2:
+                        v2 = (Literal) expStack.peek();
+                        expStack.pop();
+                        v1 = (Literal) expStack.peek();
+                        expStack.pop();
+                        ok = and( v1, v2);
+                        expStack.push(result);
                         break;
                     case 3:
+                        v1 = (Literal) expStack.peek();
+                        expStack.pop();
+                        ok = not( v1);
+                        expStack.push(result);
                         break;
                     case 4:
+                        v2 = (Literal) expStack.peek();
+                        expStack.pop();
+                        v1 = (Literal) expStack.peek();
+                        expStack.pop();
+                        ok = equality((Operator) postfix.peek(), v1, v2);
+                        expStack.push(result);
                         break;
                     case 5:
                         v2 = (Literal) expStack.peek();
@@ -342,8 +433,6 @@ public class LaoInterpreter {
                         expStack.push(result);
                         break;
                     case 6:
-                        //System.out.println("adding");
-
                         v2 = (Literal) expStack.peek();
                         expStack.pop();
                         v1 = (Literal) expStack.peek();
@@ -375,13 +464,78 @@ public class LaoInterpreter {
         result = expStack.peek();
         return true;
     }
+    /**
+     * Evaluates a logical or
+     * @param v1 First parameter
+     * @param v2 Second parameter
+     * @return 
+     */
+    public boolean or( Literal v1, Literal v2) {
+        BoolLiteral l = new BoolLiteral("bool");
+
+        l.setValue(((BoolLiteral) v1).isTrue() || ((BoolLiteral) v2).isTrue());
+        result = l;
+
+        return true;
+    }
+
+    public boolean and( Literal v1, Literal v2) {
+        BoolLiteral l = new BoolLiteral("bool");
+
+        l.setValue(((BoolLiteral) v1).isTrue() && ((BoolLiteral) v2).isTrue());
+        result = l;
+
+        return true;
+    }
+
+    public boolean not(Literal v1) {
+        BoolLiteral l = new BoolLiteral("bool");
+
+        l.setValue(!(((BoolLiteral) v1).isTrue()));
+        result = l;
+
+        return true;
+    }
+
+    public boolean equality(Operator op, Literal v1, Literal v2) {
+        BoolLiteral l = new BoolLiteral("bool");
+        int r;
+        Double d1 = Double.parseDouble(v1.getIdentifier());
+        Double d2 = Double.parseDouble(v2.getIdentifier());
+        if (v1 instanceof StringLiteral || v2 instanceof StringLiteral) {
+            if (v1 instanceof StringLiteral && v2 instanceof StringLiteral) {
+                r = v1.getIdentifier().compareTo(v2.getIdentifier());
+            } else {
+                return false;
+            }
+        } else {
+            r = d1.compareTo(d2);
+        }
+
+        switch (op.getIdentifier()) {
+            case ".eq.":
+                if (r == 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+            case ".nq.":
+                if (r != 0) {
+                    l.setValue(true);
+                } else {
+                    l.setValue(false);
+                }
+                result = l;
+                break;
+
+        }
+
+        return true;
+    }
 
     public boolean relataion(Operator op, Literal v1, Literal v2) {
-//        if (op.getIdentifier().equals(".gt.")) {}
-//        else if (op.getIdentifier().equals(".lt.")) {}
-//         else if (op.getIdentifier().equals(".ge.")) {}
-//           else if (op.getIdentifier().equals(".le.")) {}
-
         BoolLiteral l = new BoolLiteral("bool");
         int r;
         Double d1 = Double.parseDouble(v1.getIdentifier());

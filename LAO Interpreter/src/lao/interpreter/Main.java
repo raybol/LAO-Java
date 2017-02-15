@@ -3,14 +3,16 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Advanced Programming  
  */
 package lao.interpreter;
 
 /**
- * Program: <b></b><br>
- * Date : <br>
- * Description:<br>
+ * Program: <b>Lao Interpreter</b><br>
+ * Date :2/4/2017<br>
+ * Description:This program interprets statement of the LAO computer language and executes them<br>
+ * History<br>
+ * :2/4/2017 ported from c++ to java
  * <br>
  * <br>
  *
@@ -22,8 +24,12 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+    
+        
         LaoInterpreter interpreter = new LaoInterpreter();
         interpreter.run();
+       
     }
+       
 
 }

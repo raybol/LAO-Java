@@ -1,8 +1,8 @@
-if 3.0 .gt. 3 then a = 2 .add. 1 .add. 3 .mul. 4
-print a
-w = "l" .add. "4"
+a = 3 .or. 6
 print w
 end.
+
+
 
 
 
