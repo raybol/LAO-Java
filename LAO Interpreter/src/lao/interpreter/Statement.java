@@ -30,7 +30,11 @@ public class Statement {
     public Statement(ArrayList<Token> statement) {
         this.statement = statement;
     }
-
+/**
+ * Creates a statement objects and sets it's line number in the text code
+ * @param aSstatement string line of code
+ * @param num line position in the code
+ */
     public Statement(String aSstatement, int num) {
         stringStatement = aSstatement;
         validStatement = true;
@@ -157,8 +161,9 @@ public class Statement {
         this.errorID = ID;
         this.errorMsg = errorMsg;
     }
+
     /**
-     * 
+     * Prints error message
      */
     public void printError() {
 
@@ -175,7 +180,9 @@ public class Statement {
         System.out.println(errorMsg);
 
     }
-
+/**
+ * Prints statement type
+ */
     public void printStatementType() {
         switch (type) {
             case 'c':
@@ -202,14 +209,21 @@ public class Statement {
         }
     }
 
-//
+/**
+ * for testing purposes
+ */
     public void print() {
         for (Token t : statement) {
 
             System.out.println(t.getIdentifier());
         }
     }
-
+/**
+ * Counts number times a character appears in  a string
+ * @param haystack string to be searched
+ * @param needle character that is counted
+ * @return number of times a character appears
+ */
     public static int countOccurrences(String haystack, char needle) {
         int count = 0;
         for (int i = 0; i < haystack.length(); i++) {
@@ -220,9 +234,11 @@ public class Statement {
         return count;
     }
 
-//    public static  ArrayList<String> tokenizer(String aStatement){
-//        
-//    } 
+/**
+ * Verifies if the sting is a valid integer variable
+ * @param identifier a sting
+ * @return returns true is identifier is a integer variable
+ */
     public static boolean isIntVariable(String identifier) {
 
         boolean valid = false;
@@ -242,7 +258,11 @@ public class Statement {
         }
         return valid;
     }
-
+/**
+ * Verifies if the sting is a valid real variable
+ * @param identifier a sting
+ * @return returns true is identifier is a real variable
+ */
     public static boolean isRealVariable(String identifier) {
 
         boolean valid = false;
@@ -260,7 +280,11 @@ public class Statement {
         }
         return valid;
     }
-
+/**
+ * Verifies if the sting is a valid string variable
+ * @param identifier a sting
+ * @return returns true is identifier is a string variable
+ */
     public static boolean isStringVariable(String identifier) {
 
         boolean valid = false;
