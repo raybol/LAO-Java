@@ -3,26 +3,28 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
-
 package lao.interpreter;
 
 /**
+ * Represent a string
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
-public class StringLiteral extends Literal{
+public class StringLiteral extends Literal {
+
     private String Value;
     private final char type;
+
     public StringLiteral(String identifier) {
         super(identifier);
-        type='s';
+        type = 's';
     }
 
     @Override
     public char getType() {
         return type;
     }
-    
 
 }

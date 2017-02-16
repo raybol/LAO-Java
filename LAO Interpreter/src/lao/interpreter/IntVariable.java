@@ -3,15 +3,17 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
-
 package lao.interpreter;
 
 /**
+ * Holds integer values, can be changed later
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class IntVariable extends Variable {
+
     private int value;
     private final char type;
 
@@ -30,7 +32,7 @@ public class IntVariable extends Variable {
 
     @Override
     public char getType() {
-         return type;
+        return type;
     }
 
     @Override
@@ -38,4 +40,3 @@ public class IntVariable extends Variable {
         return Integer.toString(value);
     }
 }
-

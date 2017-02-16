@@ -3,21 +3,23 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
-
 package lao.interpreter;
 
 /**
+ * Holds real values can be changed later
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class RealVariable extends Variable {
+
     private double value;
     private final char type;
 
     public RealVariable(String identifier) {
         super(identifier);
-        type='r';
+        type = 'r';
     }
 
     public double getValue() {
@@ -35,8 +37,7 @@ public class RealVariable extends Variable {
 
     @Override
     public String toString() {
-         return Double.toString(value) ;
+        return Double.toString(value);
     }
-    
 
 }

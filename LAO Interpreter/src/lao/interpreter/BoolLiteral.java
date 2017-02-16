@@ -3,11 +3,13 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
 package lao.interpreter;
 
 /**
+ * Holds boolean values
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class BoolLiteral extends Literal {

@@ -3,7 +3,7 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
 package lao.interpreter;
 
@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Represents a statement of the lao language
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class Statement {
@@ -30,11 +32,13 @@ public class Statement {
     public Statement(ArrayList<Token> statement) {
         this.statement = statement;
     }
-/**
- * Creates a statement objects and sets it's line number in the text code
- * @param aSstatement string line of code
- * @param num line position in the code
- */
+
+    /**
+     * Creates a statement objects and sets it's line number in the text code
+     *
+     * @param aSstatement string line of code
+     * @param num line position in the code
+     */
     public Statement(String aSstatement, int num) {
         stringStatement = aSstatement;
         validStatement = true;
@@ -50,16 +54,11 @@ public class Statement {
         int qcount = countOccurrences(aSstatement, '"');
         boolean balanced = (qcount % 2 == 0);
         int i = 0;
-//        System.out.println(qcount);
-//        System.out.println(aSstatement.lastIndexOf('"'));
-        // if (qcount % 2 == 0) {
-        while (m.find()) {
-            // statement.add(m.group(1));
 
-            // for (String token : result) {
-            // System.out.println(m.group(1));
+        while (m.find()) {
+
             if (m.groupCount() > 1) {
-                // System.out.println(m.group());
+
             }
             if (Arrays.asList(operators).contains(m.group(1).toLowerCase())) {
                 Operator t = new Operator(m.group(1));
@@ -86,9 +85,9 @@ public class Statement {
                 StringVariable t = new StringVariable(m.group(1));
                 statement.add(t);
             } else {
-                System.out.println(m.group(1).toLowerCase());
+
                 validStatement = false;
-                errorMsg = "unkown identifier: " + m.group(1).toLowerCase() ;
+                errorMsg = "unkown identifier: " + m.group(1).toLowerCase();
                 errorID = i - 1;
             }
             i++;
@@ -109,16 +108,13 @@ public class Statement {
         } else {
             type = 'u';
         }
-        // System.out.println("done");
-        //print();
+
         if (!balanced) {
             validStatement = false;
             errorMsg = "unbalanced statement missing quote sign";
-            errorID=i-1;
+            errorID = i - 1;
         }
 
-        //  if (validStatement) {
-        // }
     }
 
     public List<Token> getStatement() {
@@ -157,6 +153,12 @@ public class Statement {
         this.type = type;
     }
 
+    /**
+     * Sets the error message and position where error was detected
+     *
+     * @param ID position of error on the statement
+     * @param errorMsg error message
+     */
     public void setError(int ID, String errorMsg) {
         this.errorID = ID;
         this.errorMsg = errorMsg;
@@ -167,8 +169,8 @@ public class Statement {
      */
     public void printError() {
 
-        System.out.println("ERROR ON LINE " + getLine());
-        System.out.println(stringStatement);
+        System.out.println("ERROR ON LINE " + getLine() + ": " + stringStatement);
+        //System.out.println(stringStatement);
         printStatementType();
         if (!statement.isEmpty()) {
             for (int i = 0; i <= errorID; i++) {
@@ -180,9 +182,10 @@ public class Statement {
         System.out.println(errorMsg);
 
     }
-/**
- * Prints statement type
- */
+
+    /**
+     * Prints statement type
+     */
     public void printStatementType() {
         switch (type) {
             case 'c':
@@ -209,21 +212,23 @@ public class Statement {
         }
     }
 
-/**
- * for testing purposes
- */
+    /**
+     * for testing purposes
+     */
     public void print() {
         for (Token t : statement) {
 
             System.out.println(t.getIdentifier());
         }
     }
-/**
- * Counts number times a character appears in  a string
- * @param haystack string to be searched
- * @param needle character that is counted
- * @return number of times a character appears
- */
+
+    /**
+     * Counts number times a character appears in a string
+     *
+     * @param haystack string to be searched
+     * @param needle character that is counted
+     * @return number of times a character appears
+     */
     public static int countOccurrences(String haystack, char needle) {
         int count = 0;
         for (int i = 0; i < haystack.length(); i++) {
@@ -234,11 +239,12 @@ public class Statement {
         return count;
     }
 
-/**
- * Verifies if the sting is a valid integer variable
- * @param identifier a sting
- * @return returns true is identifier is a integer variable
- */
+    /**
+     * Verifies if the sting is a valid integer variable
+     *
+     * @param identifier a sting
+     * @return returns true is identifier is a integer variable
+     */
     public static boolean isIntVariable(String identifier) {
 
         boolean valid = false;
@@ -247,22 +253,25 @@ public class Statement {
             valid = true;
 
         }
+
         if (identifier.length() > 1) {
 
-            for (int i = 1; identifier.length() < i && valid; i++) {
-                if (((identifier.charAt(0) < 'A' && identifier.charAt(0) > 'F')
-                        || (identifier.charAt(0) < 'a' && identifier.charAt(0) > 'f'))) {
+            for (int i = 1; i < identifier.length() && valid; i++) {
+                if (((identifier.charAt(i) < 'A' || identifier.charAt(i) > 'Z')
+                        && (identifier.charAt(i) < 'a' || identifier.charAt(i) > 'z'))) {
                     valid = false;
                 }
             }
         }
         return valid;
     }
-/**
- * Verifies if the sting is a valid real variable
- * @param identifier a sting
- * @return returns true is identifier is a real variable
- */
+
+    /**
+     * Verifies if the sting is a valid real variable
+     *
+     * @param identifier a sting
+     * @return returns true is identifier is a real variable
+     */
     public static boolean isRealVariable(String identifier) {
 
         boolean valid = false;
@@ -272,19 +281,21 @@ public class Statement {
         }
         if (identifier.length() > 1) {
             for (int i = 1; identifier.length() < i && valid; i++) {
-                if (((identifier.charAt(0) < 'A' && identifier.charAt(0) > 'F')
-                        || (identifier.charAt(0) < 'a' && identifier.charAt(0) > 'f'))) {
+                if (((identifier.charAt(i) < 'A' || identifier.charAt(i) > 'Z')
+                        && (identifier.charAt(i) < 'a' || identifier.charAt(i) > 'z'))) {
                     valid = false;
                 }
             }
         }
         return valid;
     }
-/**
- * Verifies if the sting is a valid string variable
- * @param identifier a sting
- * @return returns true is identifier is a string variable
- */
+
+    /**
+     * Verifies if the sting is a valid string variable
+     *
+     * @param identifier a sting
+     * @return returns true is identifier is a string variable
+     */
     public static boolean isStringVariable(String identifier) {
 
         boolean valid = false;
@@ -294,8 +305,8 @@ public class Statement {
         }
         if (identifier.length() > 1) {
             for (int i = 1; identifier.length() < i && valid; i++) {
-                if (((identifier.charAt(0) < 'A' && identifier.charAt(0) > 'F')
-                        || (identifier.charAt(0) < 'a' && identifier.charAt(0) > 'f'))) {
+                if (((identifier.charAt(i) < 'A' || identifier.charAt(i) > 'Z')
+                        && (identifier.charAt(i) < 'a' || identifier.charAt(i) > 'z'))) {
                     valid = false;
                 }
             }

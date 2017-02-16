@@ -3,22 +3,25 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
 package lao.interpreter;
 
 import java.util.Arrays;
 
 /**
+ * Represents operators of the lao language
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class Operator extends Token {
+
     private final char type;
     private int prescedence;
 
     public Operator(String identifier) {
         super(identifier);
-         type='o';
+        type = 'o';
         String or = ".or.";
         String and = ".and.";
         String not = ".not.";
@@ -26,7 +29,7 @@ public class Operator extends Token {
         String[] rel = {".gt.", ".lt.", ".ge.", ".le."};
         String[] addsub = {".add.", ".sub.",};
         String[] muldiv = {".mul.", ".div."};
-        
+
         if (identifier.equals(or)) {
             prescedence = 1;
         } else if (identifier.equals(and)) {
@@ -52,6 +55,5 @@ public class Operator extends Token {
     public char getType() {
         return type;
     }
-    
 
 }

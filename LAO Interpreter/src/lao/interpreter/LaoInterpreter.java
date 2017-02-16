@@ -3,7 +3,7 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
 package lao.interpreter;
 
@@ -19,6 +19,8 @@ import java.util.Scanner;
 import java.util.Stack;
 
 /**
+ * Executes statements of the lao languge
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class LaoInterpreter {
@@ -63,7 +65,7 @@ public class LaoInterpreter {
 
                             ok = execute(s);
                             if (!ok) {
-                                   
+
                                 s.printError();
                                 System.exit(0);
                                 //break;
@@ -71,7 +73,7 @@ public class LaoInterpreter {
                         } else {
                             System.out.println("bad parse");
                             s.printError();
-                         System.exit(0);
+                            System.exit(0);
                         }
 
                         code.add(s);
@@ -79,8 +81,8 @@ public class LaoInterpreter {
                     } else {
                         System.out.println("error exit");
                         s.printError();
-                     //   System.exit(0);
-                       System.exit(0);
+                        //   System.exit(0);
+                        System.exit(0);
                     }
                 }
                 i++;
@@ -88,7 +90,7 @@ public class LaoInterpreter {
             }
 
             fileReader.close();
-            System.out.println("ended before end.");
+            System.out.println("ERROR\nended before end.");
         } catch (IOException e) {
             System.out.println("file not found");
         }
@@ -190,97 +192,91 @@ public class LaoInterpreter {
      */
     public boolean executeAssignment(int start) {
 
-        sParser.setStatement(currentStatement);
-        // System.out.println(aStatement.getSize() );
-        if (sParser.isAssigment(start, currentStatement.getStatement().size() - 1)) {
+        int end = currentStatement.getStatement().size();
+        // currentStatement.getStatement().subList(2, end);
+        //evaluate expression
 
-            int end = currentStatement.getStatement().size();
-            // currentStatement.getStatement().subList(2, end);
-            //evaluate expression
+        evaluateExpression(currentStatement.getStatement().subList(start + 2, end));
 
-            evaluateExpression(currentStatement.getStatement().subList(start + 2, end));
+        //assignment
+        Variable var = (Variable) currentStatement.getStatement().get(start);
+        if (var.getType() == result.getType()) {
+            if (var instanceof IntVariable) {
+                IntVariable v = (IntVariable) (var);
+                if (result instanceof IntLiteral) {
+                    v.setValue(Integer.parseInt(result.getIdentifier()));
+                    SymbolTable.add(v);
+                } else {
+                    return false;
+                }
+            } else if (var instanceof RealVariable) {
+                RealVariable v = (RealVariable) (var);
+                v.setValue(Double.parseDouble(result.getIdentifier()));
+                SymbolTable.add(v);
+            } else if (var instanceof StringVariable) {
+                StringVariable v = (StringVariable) (var);
+                v.setValue(result.getIdentifier());
+                SymbolTable.add(v);
+            }
 
-            //assignment
-            Variable var = (Variable) currentStatement.getStatement().get(start);
-            if (var.getType() == result.getType()) {
-                if (var instanceof IntVariable) {
-                    IntVariable v = (IntVariable) (var);
-                    if (result instanceof IntLiteral) {
-                        v.setValue(Integer.parseInt(result.getIdentifier()));
-                        SymbolTable.add(v);
-                    } else {
-                        return false;
+        } else {
+            // currentStatement.printError();
+            //System.out.println("expression returned wrong type");
+
+            currentStatement.setError(start + 1, "expression returned wrong type");
+            return false;
+        }
+
+        return true;
+        //Variable v = (Variable) (aStatement.getStatement().get(2));
+        //SymbolTable.add(aStatement.getStatement().get(2));
+
+    }
+
+    /**
+     * Executes a print statement
+     *
+     * @param start stating position of the print
+     * @param end ending position of the print
+     * @return returns true if statement was successfully executed
+     */
+    public boolean executePrint(int start, int end) {
+
+        if (currentStatement.getStatement().size() == 1) {
+            System.out.println("");
+        } else if (end - start == 1) {//currentStatement.getStatement().size()
+
+            if (currentStatement.getStatement().get(end) instanceof Variable) {
+                boolean found = false;
+                Variable var = (Variable) currentStatement.getStatement().get(end);
+                for (Variable v : SymbolTable) {
+                    if (v.getIdentifier().toLowerCase().equals(var.getIdentifier().toLowerCase())) {
+                        found = true;
+                        var = v;
+                        break;
                     }
-                } else if (var instanceof RealVariable) {
-                    RealVariable v = (RealVariable) (var);
-                    v.setValue(Double.parseDouble(result.getIdentifier()));
-                    SymbolTable.add(v);
-                } else if (var instanceof StringVariable) {
-                    StringVariable v = (StringVariable) (var);
-                    v.setValue(result.getIdentifier());
-                    SymbolTable.add(v);
+                }
+                if (found) {  //print variable
+                    System.out.println(var.toString());
+                } else {//variable not found
+                    currentStatement.setError(start, "undeclared variable: " + var.getIdentifier());
+
+                    //System.out.println("undeclared variable " + var.getIdentifier());
+                    return false;
                 }
 
             } else {
-                // currentStatement.printError();
-                //System.out.println("expression returned wrong type");
-
-                currentStatement.setError(start + 1, "expression returned wrong type");
-                return false;
+                System.out.println(currentStatement.getStatement().get(1).getIdentifier());//print literal
             }
-
-            return true;
-            //Variable v = (Variable) (aStatement.getStatement().get(2));
-            //SymbolTable.add(aStatement.getStatement().get(2));
-        } else {
-            return false;
         }
-    }
-/**
- * Executes a print statement
- * @param start stating position of the print
- * @param end ending position of the print
- * @return returns true if statement was successfully executed
- */
-    public boolean executePrint(int start, int end) {
-        sParser.setStatement(currentStatement);
-        if (sParser.isPrint(start, currentStatement.getStatement().size() - 1)) {
-            if (currentStatement.getStatement().size() == 1) {
-                System.out.println("");
-            } else if (end - start == 1) {//currentStatement.getStatement().size()
+        // System.out.println("");
+        return true;
 
-                if (currentStatement.getStatement().get(end) instanceof Variable) {
-                    boolean found = false;
-                    Variable var = (Variable) currentStatement.getStatement().get(end);
-                    for (Variable v : SymbolTable) {
-                        if (v.getIdentifier().toLowerCase().equals(var.getIdentifier().toLowerCase())) {
-                            found = true;
-                            var = v;
-                            break;
-                        }
-                    }
-                    if (found) {  //print variable
-                        System.out.println(var.toString());
-                    } else {//variable not found
-                        currentStatement.setError(start, "undeclared variable: " + var.getIdentifier());
-
-                        //System.out.println("undeclared variable " + var.getIdentifier());
-                        return false;
-                    }
-
-                } else {
-                    System.out.println(currentStatement.getStatement().get(1).getIdentifier());//print literal
-                }
-            }
-            // System.out.println("");
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
      * Executes a read statement
+     *
      * @param start Starting position of the read in the statement
      * @param end Ending position of the read in the statement
      * @return returns true if statement was successfully executed
@@ -321,11 +317,13 @@ public class LaoInterpreter {
         }
         return true;
     }
-/**
- * Evaluates logical/conditional/arithmetic expressions
- * @param expression Expression to be evaluated
- * @return returns true if expression successfully evaluated
- */
+
+    /**
+     * Evaluates logical/conditional/arithmetic expressions
+     *
+     * @param expression Expression to be evaluated
+     * @return returns true if expression successfully evaluated
+     */
     public boolean evaluateExpression(List<Token> expression) {
         //switch variables for literals
         for (Token t : expression) {
@@ -357,7 +355,8 @@ public class LaoInterpreter {
                         expression.set(i, literal);
                     }
                 } else {
-                    System.out.println("missing variable " + t.getIdentifier() + " declaration");
+                    currentStatement.setError(i, "missing variable " + t.getIdentifier() + " declaration");
+                    //System.out.println("missing variable " + t.getIdentifier() + " declaration");
                     return false;
                 }
 
@@ -365,9 +364,9 @@ public class LaoInterpreter {
         }
         //evaluate expression
         //ArrayList<Token> postfix = new ArrayList<>();
-        Queue<Token> postfix = new ArrayDeque();
-        Stack<Operator> opStack = new Stack();
-        Stack<Token> expStack = new Stack();
+        Queue<Token> postfix = new ArrayDeque<>();
+        Stack<Operator> opStack = new Stack<>();
+        Stack<Token> expStack = new Stack<>();
         for (Token t : expression) {
             // System.out.println(t);
             if (t instanceof Variable || t instanceof Literal) {
@@ -399,7 +398,7 @@ public class LaoInterpreter {
                         expStack.pop();
                         v1 = (Literal) expStack.peek();
                         expStack.pop();
-                        ok = or( v1, v2);
+                        ok = or(v1, v2);
                         expStack.push(result);
                         break;
                     case 2:
@@ -407,13 +406,13 @@ public class LaoInterpreter {
                         expStack.pop();
                         v1 = (Literal) expStack.peek();
                         expStack.pop();
-                        ok = and( v1, v2);
+                        ok = and(v1, v2);
                         expStack.push(result);
                         break;
                     case 3:
                         v1 = (Literal) expStack.peek();
                         expStack.pop();
-                        ok = not( v1);
+                        ok = not(v1);
                         expStack.push(result);
                         break;
                     case 4:
@@ -464,39 +463,81 @@ public class LaoInterpreter {
         result = expStack.peek();
         return true;
     }
+
     /**
      * Evaluates a logical or
-     * @param v1 First parameter
-     * @param v2 Second parameter
-     * @return 
+     *
+     * @param v1 A boolean literal true/false value
+     * @param v2 A boolean literal true/false value
+     * @return True if the operation was successful
      */
-    public boolean or( Literal v1, Literal v2) {
-        BoolLiteral l = new BoolLiteral("bool");
+    public boolean or(Literal v1, Literal v2) {
+        try {
+            BoolLiteral l = new BoolLiteral("bool");
 
-        l.setValue(((BoolLiteral) v1).isTrue() || ((BoolLiteral) v2).isTrue());
-        result = l;
+            l.setValue(((BoolLiteral) v1).isTrue() || ((BoolLiteral) v2).isTrue());
+            result = l;
 
-        return true;
+            return true;
+        } catch (Exception e) {
+            currentStatement.setError(1, "Error produce while evaluating or");
+            return false;
+        }
+
     }
 
-    public boolean and( Literal v1, Literal v2) {
-        BoolLiteral l = new BoolLiteral("bool");
+    /**
+     * Evaluates a logical and
+     *
+     * @param v1 A boolean literal true/false value
+     * @param v2 A boolean literal true/false value
+     * @return A boolean literal true/false value
+     */
+    public boolean and(Literal v1, Literal v2) {
+        try {
+            BoolLiteral l = new BoolLiteral("bool");
 
-        l.setValue(((BoolLiteral) v1).isTrue() && ((BoolLiteral) v2).isTrue());
-        result = l;
+            l.setValue(((BoolLiteral) v1).isTrue() && ((BoolLiteral) v2).isTrue());
+            result = l;
 
-        return true;
+            return true;
+        } catch (Exception e) {
+
+            currentStatement.setError(1, "Error produce while evaluating and");
+            return false;
+        }
+
     }
 
+    /**
+     * Evaluates a logical not
+     *
+     * @param v1 A boolean literal true/false value
+     * @return A boolean literal true/false value
+     */
     public boolean not(Literal v1) {
-        BoolLiteral l = new BoolLiteral("bool");
+        try {
+            BoolLiteral l = new BoolLiteral("bool");
 
-        l.setValue(!(((BoolLiteral) v1).isTrue()));
-        result = l;
+            l.setValue(!(((BoolLiteral) v1).isTrue()));
+            result = l;
 
-        return true;
+            return true;
+        } catch (Exception e) {
+            currentStatement.setError(1, "Error produce while evaluating not");
+            return false;
+        }
+
     }
 
+    /**
+     * Compares strings, real numbers, or integer numbers
+     *
+     * @param op .eq. .ne.
+     * @param v1 strings, real numbers, or integer numbers
+     * @param v2 strings, real numbers, or integer numbers
+     * @return True if the operation was successful
+     */
     public boolean equality(Operator op, Literal v1, Literal v2) {
         BoolLiteral l = new BoolLiteral("bool");
         int r;
@@ -506,6 +547,7 @@ public class LaoInterpreter {
             if (v1 instanceof StringLiteral && v2 instanceof StringLiteral) {
                 r = v1.getIdentifier().compareTo(v2.getIdentifier());
             } else {
+                currentStatement.setError(1, "Strings can only be compared to other strings");
                 return false;
             }
         } else {
@@ -535,6 +577,14 @@ public class LaoInterpreter {
         return true;
     }
 
+    /**
+     * Executes relational operations
+     *
+     * @param op .gt. .lt. . ge. .le.
+     * @param v1 a integer or real number, or string
+     * @param v2 a integer or real number, or string
+     * @return returns true if the operation was successful
+     */
     public boolean relataion(Operator op, Literal v1, Literal v2) {
         BoolLiteral l = new BoolLiteral("bool");
         int r;
@@ -544,6 +594,7 @@ public class LaoInterpreter {
             if (v1 instanceof StringLiteral && v2 instanceof StringLiteral) {
                 r = v1.getIdentifier().compareTo(v2.getIdentifier());
             } else {
+                currentStatement.setError(1, "Strings can only be compared to other strings");
                 return false;
             }
         } else {
@@ -588,6 +639,14 @@ public class LaoInterpreter {
         return true;
     }
 
+    /**
+     * Evaluates addition and subtraction
+     *
+     * @param op .add. .sub
+     * @param v1 a integer or real number, or string
+     * @param v2 a integer or real number, or string
+     * @return true if the operation was successful
+     */
     public boolean addsub(Operator op, Literal v1, Literal v2) {
         int ir;
         double dr;
@@ -606,6 +665,7 @@ public class LaoInterpreter {
         } else if (op.getIdentifier().equals(".sub.")) {
             //cant substract string
             if (v1 instanceof StringLiteral || v2 instanceof StringLiteral) {
+                currentStatement.setError(1, "cannot substract string");
                 return false;
             } else if (v1 instanceof RealLiteral || v2 instanceof RealLiteral) {
                 dr = Double.parseDouble(v1.getIdentifier()) - Double.parseDouble(v2.getIdentifier());
@@ -618,12 +678,21 @@ public class LaoInterpreter {
         return true;
     }
 
+    /**
+     * Evaluates multiplication and division
+     *
+     * @param op .mul. or .div.
+     * @param v1 integer or real number
+     * @param v2 integer or real number
+     * @return returns true if the operation was successful
+     */
     public boolean muldiv(Operator op, Literal v1, Literal v2) {
         int ir;
         double dr;
         //addition
         if (op.getIdentifier().equals(".mul.")) {
             if (v1 instanceof StringLiteral || v2 instanceof StringLiteral) {
+                currentStatement.setError(1, "cannot multiply or divide strings");
                 return false;
             } else if (v1 instanceof RealLiteral || v2 instanceof RealLiteral) {
                 dr = Double.parseDouble(v1.getIdentifier()) * Double.parseDouble(v2.getIdentifier());

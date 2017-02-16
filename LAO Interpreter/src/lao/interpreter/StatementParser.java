@@ -3,13 +3,15 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
 package lao.interpreter;
 
 import java.util.Arrays;
 
 /**
+ * Verifies that a lao language statement is syntactically correct
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class StatementParser {
@@ -27,13 +29,11 @@ public class StatementParser {
         this.statement = statement;
     }
 
-//    public boolean isComment() {
-//
-//        if (statement.getStatement().get(0).getIdentifier().equals("rem")) {
-//            return true;
-//        }
-//        return false;
-//    }
+    /**
+     * Selects the proper method to execute depending on the statement
+     *
+     * @return retursn true if statement is valid
+     */
     public boolean parse() {
         boolean ok = true;
 
@@ -41,20 +41,19 @@ public class StatementParser {
             case 'c':
                 break;
             case 'p':
-                ok = isPrint(0, statement.getStatement().size() - 1);
+                ok = isPrintStatement(0, statement.getStatement().size() - 1);
                 break;
             case 'r':
+                ok = isReadStatement(0, statement.getStatement().size() - 1);
                 break;
             case 'i':
                 ok = isIfStatement();
                 break;
             case 'e':
-
                 break;
             case 'a':
                 ok = isAssigment(0, statement.getStatement().size() - 1);
                 break;
-
             case 'u':
                 ok = false;
                 break;
@@ -63,33 +62,18 @@ public class StatementParser {
         return ok;
     }
 
-    public boolean isPrint(int start, int end) {
+    /**
+     * Verifies a print statement
+     *
+     * @param start starting position of the print part on the line of code
+     * @param end ending position of the print part on the line of code
+     * @return returns true if the print statement doesn't have any errors
+     */
+    boolean isPrintStatement(int start, int end) {
 
-        if ((end - start) == 1) {//isVariable(statement[start + 1]) ||
+        if ((end - start) == 1) {
             if (statement.getStatement().get(start + 1) instanceof Variable
                     || statement.getStatement().get(start + 1) instanceof Literal) {
-                //  isVariable(statement[start + 1]) || isRealwExp(statement[start + 1]) || isString(statement[start + 1])) {
-                return true;
-            }
-
-        } else if (end == start) {
-            return true;
-        }
-        // printStatement(statement, start);
-        statement.setError(end, "expected variable, number or string");
-        //System.out.println("expected variable, number or string");
-        //    cout << "expected variable, number or string" << endl;
-        return false;
-    }
-
-    boolean isPrintStatement(int start, int end) {
-//	if (!(statement[start].toLower() == "print")) {
-//		cout << "error1" << endl;
-//		return false;
-//	}
-
-        if ((end - start) == 1) {//isVariable(statement[start + 1]) ||
-            if (statement.getStatement().get(start + 1) instanceof Variable || statement.getStatement().get(start + 1) instanceof Literal) {
                 return true;
             }
 
@@ -97,11 +81,16 @@ public class StatementParser {
             return true;
         }
         statement.setError(start, "expected variable, number or string");
-//	printStatement(statement, start);
-//	cout << "expected variable, number or string" << endl;
         return false;
     }
 
+    /**
+     * Verifies a read statement
+     *
+     * @param start starting position of the read part on the line of code
+     * @param end ending position of the read part on the line of code
+     * @return returns true if the read statement doesn't have any errors
+     */
     boolean isReadStatement(int start, int end) {
 //	if (statement[start].toLower() == "read") {
         if ((end - start) == 1) {
@@ -110,36 +99,33 @@ public class StatementParser {
             }
         }
 //	}
-        statement.setError(start, "print must be followed by 1 variable");
+        statement.setError(start, "print can be followed by only 1 variable");
         return false;
     }
 
+    /**
+     * Verifies a if/then statement
+     *
+     * @return returns if the statement doesn't have any errors
+     */
     boolean isIfStatement() {
-        //If
-//        if (!(statement[start].toLower() == "if")) {
-//                return false;
-//        }
 
         int i;
         int start = 0;
-        int end = statement.getStatement().size()-1;
+        int end = statement.getStatement().size() - 1;
         boolean hasThen = false;
         for (i = 1; i < end; i++) {
-            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals( "then") ) {
+            if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals("then")) {
                 hasThen = true;
                 break;
             }
         }
         if (!hasThen) {
             statement.setError(i, "missing then part");
-//		printStatement(statement, i);
-//		cout << "missing then part" << endl;
             return false;
         }
         if (i == end) {
             statement.setError(i, "missing condition");
-//		printStatement(i, "missing condition");
-//		cout << "missing condition" << endl;
             return false;
         }
 
@@ -157,17 +143,19 @@ public class StatementParser {
         return false;
     }
 
+    /**
+     * Verifies a the condition part of an if/then statement
+     *
+     * @param start starting position of the condition part on the line of code
+     * @param end ending position of the condition part on the line of code
+     * @return returns true if the condition statement doesn't have any errors
+     */
     boolean isConditionalExpression(int start, int end) {
         if (statement.getStatement().get(end) instanceof Operator) {
             statement.setError(end, "missing operand");
 
             return false;
         }
-//	if (isOperator(statement[end])) {
-//		printStatement(statement, end);
-//		cout << "missing operand";
-//		return false;
-//	}
         boolean hasOp = false;
         String[] operators = {".or.", ".and.", ".not.", ".gt.", ".lt.", ".eq.", ".ge.", ".le.", ".ne.", "="};
         for (int i = start; i <= end && !hasOp; i++) {
@@ -179,18 +167,26 @@ public class StatementParser {
         if (!hasOp) {
             statement.setError(end, "missing logical or relation operator");
 
-//		printStatement(statement, end);
-//		cout << "missing logical or relation operator";
             return false;
         }
         return isLogicalExpression(start, end);
     }
 
+    /**
+     * Verifies a conditional expression
+     *
+     * @param start starting position of the conditional expression on the line
+     * of code
+     * @param end ending position of the conditional expression on the line of
+     * code
+     * @return returns true if the condition conditional expression doesn't have
+     * any errors
+     */
     boolean isLogicalExpression(int start, int end) {
 
         boolean hasOP = false;
         int i;
-        //for (it; it != statement.end(); ++it, i++) 
+
         for (i = start; i < end; i++) {
             if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".and.")
                     || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".or.")) {
@@ -209,6 +205,14 @@ public class StatementParser {
 
     }
 
+    /**
+     * Verifies a logical negation
+     *
+     * @param start starting position of the logical negation on the line of
+     * code
+     * @param end ending position of the logical negation on the line of code
+     * @return returns true if the logical negation doesn't have any errors
+     */
     boolean isNeg(int start, int end) {
 
         boolean hasOP = false;
@@ -227,17 +231,24 @@ public class StatementParser {
             } else {
                 return isNeg(start, i - 1) && isEQExpression(i + 1, end);
             }//isNeg(i + 1, end)
-           
+
         } else {
             return isEQExpression(start, end);
         }
         //return true;
     }
 
+    /**
+     * Verifies an equality
+     *
+     * @param start starting position of the equality on the line of code
+     * @param end ending position of the equality on the line of code
+     * @return returns true if the equality doesn't have any errors
+     */
     boolean isEQExpression(int start, int end) {
 
         boolean hasOP = false;
-        int i = start;
+        int i;
 
         for (i = start; i < end; i++) {
             if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".eq.")
@@ -256,10 +267,19 @@ public class StatementParser {
 
     }
 
+    /**
+     * Verifies a relational expression
+     *
+     * @param start starting position of the relational expression on the line
+     * of code
+     * @param end ending position of the relational expression on the line of
+     * code
+     * @return returns true if the relational expression doesn't have any errors
+     */
     boolean isRelationalexpression(int start, int end) {
 
         boolean hasOP = false;
-        int i ;
+        int i;
 
         String[] operators = {".gt.", ".lt.", ".ge.", ".le."};
         for (i = start; i < end; i++) {
@@ -271,27 +291,26 @@ public class StatementParser {
         }
 
         if (hasOP) {
-//		if (isStringVariable((statement[i + 1])) || isStringVariable((statement[i - 1])) || isString((statement[i + 1])) || isString((statement[i - 1]))) {
-//			if (
-//				!((isStringVariable((statement[i - 1])) || isString((statement[i - 1]))) && (!(isStringVariable((statement[i + 1]))) || (!isString((statement[i + 1])))))
-//				)
-//			{
-//				printStatement(statement, i);
-//				cout << "opertator: " << statement[i] << " wrong operand data type" << endl;
-//				return false;
-//			}
-//
-//		}
             return isRelationalexpression(start, i - 1) && isExpression(i + 1, end);
         } else {
             return isExpression(start, end);
         }
-        //return true;
+
     }
 
+    /**
+     * Verifies a addition/subraction expression
+     *
+     * @param start starting position of the addition/subraction expression on
+     * the line of code
+     * @param end ending position of the addition/subraction expression on the
+     * line of code
+     * @return returns true if the addition/subraction expression doesn't have
+     * any errors
+     */
     boolean isExpression(int start, int end) {
 
-        int i = start;
+        int i;
         boolean hasOP = false;
         for (i = start; i < end; i++) {
             if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".add.")
@@ -309,17 +328,22 @@ public class StatementParser {
             }
             return isExpression(start, i - 1) && isFactor(i + 1, end);
         } else {
-            /*	if (isOperator(statement[i])) {
-				cout << "error 2ops de corrido" << endl;
-				return false;
-			}
 
-			else*/
             return isFactor(start, end);
         }
-        //return true;
+
     }
 
+    /**
+     * Verifies a multiplication/division expression
+     *
+     * @param start starting position of the multiplication/division expression
+     * on the line of code
+     * @param end ending position of the multiplication/division expression on
+     * the line of code
+     * @return returns true if the multiplication/division expression doesn't
+     * have any errors
+     */
     boolean isFactor(int start, int end) {
 
         boolean hasOP = false;
@@ -334,23 +358,21 @@ public class StatementParser {
 
         if (hasOP) {
 
-//		if (isStringVariable((statement[i + 1])) || isStringVariable((statement[i - 1])) || isString((statement[i + 1])) || isString((statement[i - 1]))) {
-//			printStatement(statement, i);
-//			cout << "opertator: " << statement[i] << " wrong operand data type" << endl;
-//			return false;
-//		}
             return isFactor(start, i - 1) && isTerm(i + 1, end);
         } else {
-            /*	if (isOperator(statement[i + 1])) {
-		cout << "error 2ops de corrido" << endl;
-		return false;
-		}
-		else*/
+
             return isTerm(start, end);
         }
-        //return true;
+
     }
 
+    /**
+     * Verifies if the term in the expression is valid
+     *
+     * @param start starting position of the term on the line of code
+     * @param end ending position of the term on the line of code
+     * @return returns true if the term doesn't have any errors
+     */
     boolean isTerm(int start, int end) {
 
         if (start < end) {
@@ -368,24 +390,28 @@ public class StatementParser {
 
         } else {
 
-            //statement.printError();
-            //  System.out.println("expected variable, string or number");
             statement.setError(end, "expected variable, string or number");
             return false;
 
         }
     }
 
+    /**
+     * Verifies if the assignment part of a statement is valid
+     *
+     * @param start starting position of the assignment part on the line of code
+     * @param end ending position of the assignment part on the line of code
+     * @return returns true if the assignment part doesn't have any errors
+     */
+
     public boolean isAssigment(int start, int end) {
-        // System.out.println("arexp");
+
         if (start == end) {
-            //print(end);
+
             statement.setError(start, "expected assingment");
             return false;
         }
-//            if (!((statement[start].isVariable))) {
-//                return false;
-//            }
+
         if (!(statement.getStatement().get(start + 1).getIdentifier().equals("="))) {
 
             return false;
@@ -396,9 +422,18 @@ public class StatementParser {
         }
         return true;
 
-        //  return false;
     }
 
+    /**
+     * Verifies a addition/subraction expression
+     *
+     * @param start starting position of the addition/subraction expression on
+     * the line of code
+     * @param end ending position of the addition/subraction expression on the
+     * line of code
+     * @return returns true if the addition/subraction expression doesn't have
+     * any errors
+     */
     public boolean isArExpression(int start, int end) {
         int i;
         boolean hasOP = false;
@@ -417,25 +452,27 @@ public class StatementParser {
             }
             return isArExpression(start, i - 1) && isArFactor(i + 1, end);
         } else {
-            /*	if (isOperator(statement[i])) {
-		cout << "error 2ops de corrido" << endl;
-		return false;
-		}
 
-		else*/
             return isArFactor(start, end);
         }
-        //return true;
+
     }
 
+    /**
+     * Verifies a multiplication/division expression
+     *
+     * @param start starting position of the multiplication/division expression
+     * on the line of code
+     * @param end ending position of the multiplication/division expression on
+     * the line of code
+     * @return returns true if the multiplication/division expression doesn't
+     * have any errors
+     */
     public boolean isArFactor(int start, int end) {
 
         boolean hasOP = false;
-        int i = start;
+        int i;
 
-//        for(Token t:statement.getStatement()){
-//            if(t instaceof instanceof )
-//        }
         for (i = start; i < end; i++) {
             if (statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".mul.")
                     || statement.getStatement().get(i).getIdentifier().toLowerCase().equals(".div.")) {
@@ -445,70 +482,41 @@ public class StatementParser {
         }
 
         if (hasOP) {
-//    ESTO VA
-//            if (isStringVariable((statement[i + 1]))
-//                    || isStringVariable((statement[i - 1]))
-//                    || isString((statement[i + 1]))
-//                    || isString((statement[i - 1]))) {
-//                //  printStatement(statement, i);  "opertator: " << statement[i] << 
-//                errorMsg = " wrong operand data type";
-//                errorID = i;
-//                return false;
-//            }
 
-
-            /*if (isIntVariable((statement[i + 1])) || isIntVariable((statement[i - 1]))) {
-
-			printStatement(statement, i);
-			cout << "opertator: " << statement[i] << " wrong operand data type" << endl;
-			return false;
-
-
-		}*/
-
- /*if (i == start || i == end) {
-			cout << "missing operation" << endl;
-			return false;
-		}*/
             return isArFactor(start, i - 1) && isArTerm(i + 1, end);
         } else {
-            /*	if (isOperator(statement[i + 1])) {
-		cout << "error 2ops de corrido" << endl;
-		return false;
-		}
-		else*/
+
             return isArTerm(start, end);
         }
-        //return true;
+
     }
 
+    /**
+     * Verifies if the term in the expression is valid
+     *
+     * @param start starting position of the term on the line of code
+     * @param end ending position of the term on the line of code
+     * @return returns true if the term doesn't have any errors
+     */
     boolean isArTerm(int start, int end) {
 
         if (start < end) {
-            if ((statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".add.") ) //                    || isArithmeticOperator(statement[start + 1])
-                    //                    || isRelationalOperator(statement[start + 1])
-                    //                    || statement[start + 1].toLower() == ".or."
-                    //                    || statement[start + 1].toLower() == ".and."
-                    ) {
+            if ((statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".add."))
+                    || (statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".sub."))
+                    || (statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".mul."))
+                    || (statement.getStatement().get(start + 1).getIdentifier().toLowerCase().equals(".div."))) {
                 return isArExpression(start, end);
             } else {
-                // printStatement(statement, end);
 
                 statement.setError(end, "missing or wrong operand");
                 return false;
             }
-        } else if ((statement.getStatement().get(start) instanceof Variable)//                isRealwExp(statement[start])
-                || statement.getStatement().get(start) instanceof Literal //                || statement.getStatement().get(start + 1) instanceof Literal
-                //                || isRealVariable(statement[start])
-                //                || isStringVariable(statement[start])
-                //                || isString(statement[start])
+        } else if ((statement.getStatement().get(start) instanceof Variable)//              
+                || statement.getStatement().get(start) instanceof Literal //              
                 ) {
             return true;
         } else {
-            // printStatement(statement, end);
-            // statement.setErrorID(end);
-            //  statement.printError();
-            //         System.out.println("expected variable, string or number");
+
             statement.setError(end, "expected variable, string or number");
             return false;
         }

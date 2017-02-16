@@ -3,20 +3,23 @@
  *   Electrical & Computer Engineering and                       
  *        Computer Science Department                            
  *                                                                
- *       CECS3210 Advanced Programming  
+ *      CECS 4200 Programming Languages  
  */
-
 package lao.interpreter;
 
 /**
+ * Holds a string value can be changed later
+ *
  * @author Raul Feliciano &lt;felicianoraul@gmail.com&gt;
  */
 public class StringVariable extends Variable {
+
     private String value;
     private final char type;
+
     public StringVariable(String identifier) {
         super(identifier);
-        type='s';
+        type = 's';
     }
 
     public String getValue() {
@@ -34,8 +37,7 @@ public class StringVariable extends Variable {
 
     @Override
     public String toString() {
-        return value ;
+        return value;
     }
-    
-    
+
 }

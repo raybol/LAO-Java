@@ -1,5 +1,5 @@
-a = 3 .or. 6
-print w
+a5 = 3 .mul. 6
+print al
 end.
 
 
